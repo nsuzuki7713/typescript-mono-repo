@@ -5,8 +5,8 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "lint": "eslint",
-    "lint:fix": "eslint --fix"
+    "lint": "eslint --ext .ts",
+    "lint:fix": "eslint --fix  --ext .ts"
   },
   "devDependencies": {
     "@swc/core": "^1.2.223",
