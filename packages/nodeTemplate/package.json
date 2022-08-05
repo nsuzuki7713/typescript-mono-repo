@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint --ext .ts",
-    "lint:fix": "eslint --fix  --ext .ts"
+    "lint:fix": "eslint --fix  --ext .ts",
+    "test": "jest"
   },
   "devDependencies": {
     "@swc/core": "^1.2.223",
