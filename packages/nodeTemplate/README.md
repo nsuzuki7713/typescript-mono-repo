@@ -10,7 +10,7 @@
 
 # 参考資料
 
-- [TypeScript + Node.js プロジェクトに ESLint + Prettier を導入する手順 2020](https://qiita.com/notakaos/items/85fd2f5c549f247585b1)
+- [TypeScript + Node.js プロジェクトのはじめかた 2020](https://qiita.com/notakaos/items/3bbd2293e2ff286d9f49)
 - [公開されたシンボルに JSDoc/TSDoc を書くことを ESLint でルール化したい](https://this.aereal.org/entry/2020/07/29/235650)
 - [Jest で TypeScript を高速化する](https://miyauchi.dev/ja/posts/speeding-up-jest/)
 - [tsconfig.json のよく使いそうなオプションを理解する](https://zenn.dev/chida/articles/bdbcd59c90e2e1)
