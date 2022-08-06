@@ -10,7 +10,7 @@
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
+    "deploy": "firebase deploy --only functions --force",
     "logs": "firebase functions:log"
   },
   "engines": {
@@ -18,8 +18,8 @@
   },
   "main": "dist/index.js",
   "dependencies": {
-    "firebase-admin": "^10.0.2",
-    "firebase-functions": "^3.18.0"
+    "firebase-admin": "^11.0.1",
+    "firebase-functions": "^3.22.0"
   },
   "devDependencies": {
     "@swc/core": "^1.2.223",
