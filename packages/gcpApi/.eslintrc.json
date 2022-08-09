@@ -1,0 +1,36 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:jest/recommended",
+    "plugin:jest/style",
+    "plugin:jsdoc/recommended",
+    "prettier"
+  ],
+  "plugins": ["@typescript-eslint", "jest", "jsdoc"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "env": { "node": true, "es6": true },
+  "rules": {
+    "jsdoc/require-jsdoc": [
+      "error",
+      {
+        // エクスポートされたもだけを有効にする
+        "publicOnly": true,
+        "require": {
+          "ArrowFunctionExpression": true,
+          "ClassDeclaration": true,
+          "MethodDefinition": true
+        },
+        // Constructor のコメントはオフにする
+        "checkConstructors": false
+      }
+    ],
+    // TypeScript なので引数の型の説明はオフにする
+    "jsdoc/require-param-type": "off",
+    // TypeScript なので返り値の型の説明オフにする
+    "jsdoc/require-returns-type": "off"
+  }
+}
