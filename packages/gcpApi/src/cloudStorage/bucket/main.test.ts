@@ -64,7 +64,7 @@ describe('GcpBucket', () => {
     });
   });
 
-  describe('deleteBucket', () => {
+  describe.skip('deleteBucket', () => {
     it('引数で指定したバケットを削除する', async () => {
       const bucketName = `test-bucket-${v4()}`;
       await gcpBucket.createBucket(bucketName);
@@ -76,6 +76,26 @@ describe('GcpBucket', () => {
 
     it('存在しないバケットを指定した場合、エラーになる', async () => {
       await expect(gcpBucket.deleteBucket('not-found-bucket')).rejects.toThrow();
+    });
+  });
+
+  describe.skip('exists', () => {
+    const bucketName = `test-bucket-${v4()}`;
+
+    beforeAll(async () => {
+      await gcpBucket.createBucket(bucketName);
+    });
+
+    afterAll(async () => {
+      await gcpBucket.deleteBucket(bucketName);
+    });
+
+    it('引数でしたバケットが存在する場合、trueを返す', async () => {
+      await expect(gcpBucket.exists(bucketName)).resolves.toEqual([true]);
+    });
+
+    it('引数でしたバケットが存在しない場合、falseを返す', async () => {
+      await expect(gcpBucket.exists('not-found-bucket')).resolves.toEqual([false]);
     });
   });
 });
