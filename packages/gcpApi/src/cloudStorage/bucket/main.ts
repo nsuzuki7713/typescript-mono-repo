@@ -3,10 +3,11 @@ import { CreateBucketRequest, GetBucketsRequest, Storage } from '@google-cloud/s
 /**
  * バケット操作に関するクラス
  *
+ * @see Cloud Storage バケットについて {@link https://cloud.google.com/storage/docs/buckets}
  * @see エラーレスポンス {@link https://cloud.google.com/storage/docs/json_api/v1/status-codes}
  */
 export class GcpBucket {
-  private readonly storage = new Storage({ keyFilename: './credential.json' });
+  private readonly storage = new Storage({ keyFilename: `${__dirname}/../../../credential.json` });
 
   /**
    * バケットを新規作成する
