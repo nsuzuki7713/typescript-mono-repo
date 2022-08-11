@@ -31,6 +31,10 @@
     // TypeScript なので引数の型の説明はオフにする
     "jsdoc/require-param-type": "off",
     // TypeScript なので返り値の型の説明オフにする
-    "jsdoc/require-returns-type": "off"
+    "jsdoc/require-returns-type": "off",
+    // onlyを使って特定のテストのみを実行できるようにする
+    "jest/no-focused-tests": "off",
+    // 動作確認で不便なのでoffにする
+    "jest/no-disabled-tests": "off"
   }
 }
