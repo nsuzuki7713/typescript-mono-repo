@@ -18,17 +18,33 @@ describe('GcpObject', () => {
   //   await gcpBucket.deleteBucket(bucketName);
   // });
 
-  describe('uploadFile', () => {
+  describe.skip('uploadFile', () => {
     const filePath = `${__dirname}/test.txt`;
 
-    beforeAll(async () => {
+    beforeAll(() => {
       fs.writeFileSync(filePath, 'test');
     });
 
-    afterAll(async () => {});
+    afterAll(async () => {
+      fs.unlinkSync(filePath);
+    });
 
-    it('引数で指定したファイルパスのものをアップロードする', async () => {
+    it('引数で指定したファイルパスのものをアップロードできる', async () => {
       await gcpObject.uploadFile(filePath);
+
+      // @todo: アップロードできたかの検証をする
+      expect(1).toBe(1);
+    });
+
+    it('ファイルを保存する場所を指定してアップロードできる', async () => {
+      await gcpObject.uploadFile(filePath, { destination: 'aaa/bbb/ccc.txt' });
+
+      // @todo: アップロードできたかの検証をする
+      expect(1).toBe(1);
+    });
+
+    it('gzipしてアップロードできる', async () => {
+      await gcpObject.uploadFile(filePath, { destination: 'aaa/bbb/ddd.txt', gzip: true });
 
       // @todo: アップロードできたかの検証をする
       expect(1).toBe(1);
