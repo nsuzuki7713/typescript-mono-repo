@@ -1,4 +1,14 @@
-import { DownloadOptions, FileOptions, Storage, UploadOptions } from '@google-cloud/storage';
+import {
+  DeleteFilesOptions,
+  DownloadOptions,
+  FileExistsOptions,
+  FileOptions,
+  GetFilesOptions,
+  GetSignedUrlConfig,
+  Storage,
+  UploadOptions,
+} from '@google-cloud/storage';
+import { ExistsOptions } from '@google-cloud/storage/build/src/nodejs-common/service-object';
 
 /**
  * オブジェクト周りを操作するクラス
@@ -42,6 +52,7 @@ export class GcpObject {
    *
    * @param fileName ファイル名
    * @param options オプション
+   * @see API {@link https://googleapis.dev/nodejs/storage/latest/File.html#download}
    */
   async downloadFile(fileName: string, options?: DownloadOptions): Promise<string | undefined> {
     const [file] = await this.bucket.file(fileName).download(options);
@@ -51,6 +62,117 @@ export class GcpObject {
     }
 
     return file.toString();
+  }
+
+  /**
+   * オブジェクトを一覧を取得する
+   *
+   * @param query 検索クエリ
+   * @see API {@link https://googleapis.dev/nodejs/storage/latest/Bucket.html#getFiles}
+   */
+  async getFiles(query?: GetFilesOptions) {
+    const [files] = await this.bucket.getFiles(query);
+
+    return files;
+  }
+
+  /**
+   * オブジェクトをコピーする
+   *
+   * @param srcFileName コピー元のファイル名
+   * @param destFileName コピー先のファイル名
+   */
+  async copyFile(srcFileName: string, destFileName: string) {
+    const [file] = await this.bucket.file(srcFileName).copy(destFileName);
+
+    return file;
+  }
+
+  /**
+   * オブジェクトをrenameする
+   *
+   * @param srcFileName rename 元のファイル名
+   * @param destFileName renameするファイル名
+   * @see API {@link https://googleapis.dev/nodejs/storage/latest/File.html#rename}
+   */
+  async renameFile(srcFileName: string, destFileName: string) {
+    const [file] = await this.bucket.file(srcFileName).rename(destFileName);
+
+    return file;
+  }
+
+  /**
+   * オブジェクトを移動する
+   *
+   * @param srcFileName
+   * @param destFileName
+   * @see API {@link https://googleapis.dev/nodejs/storage/latest/File.html#move}
+   */
+  async moveFile(srcFileName: string, destFileName: string) {
+    const [file] = await this.bucket.file(srcFileName).move(destFileName);
+
+    return file;
+  }
+
+  /**
+   *
+   * @param fileName
+   */
+  async deleteFile(fileName: string) {
+    await this.bucket.file(fileName).delete();
+  }
+
+  /**
+   *
+   * @param fileName
+   * @see API {@link https://googleapis.dev/nodejs/storage/latest/File.html#getSignedUrl}
+   */
+  async generateV4ReadSignedUrl(fileName: string) {
+    const options: GetSignedUrlConfig = {
+      version: 'v4',
+      action: 'read',
+      expires: Date.now() + 1 * 60 * 1000, // 1 minutes
+    };
+
+    const [url] = await this.bucket.file(fileName).getSignedUrl(options);
+
+    return url;
+  }
+
+  /**
+   *
+   * @param fileName
+   */
+  async generateV4UploadSignedUrl(fileName: string) {
+    const options: GetSignedUrlConfig = {
+      version: 'v4',
+      action: 'write',
+      expires: Date.now() + 10 * 60 * 1000, // 10 minutes
+      contentType: 'text/plain',
+    };
+
+    const [url] = await this.bucket.file(fileName).getSignedUrl(options);
+
+    return url;
+  }
+
+  /**
+   *
+   * @param query
+   */
+  async deleteFiles(query: DeleteFilesOptions) {
+    await this.bucket.deleteFiles(query);
+  }
+
+  /**
+   *
+   * @param fileName
+   * @param options
+   */
+  async existsFile(fileName: string, options?: FileExistsOptions) {
+    const [exists] = await this.bucket.file(fileName).exists(options);
+
+    return exists;
   }
 
   /**
