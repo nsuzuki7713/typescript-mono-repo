@@ -199,7 +199,7 @@ describe('GcpObject', () => {
     });
   });
 
-  describe('generateV4WriteSignedUrl', () => {
+  describe.skip('generateV4WriteSignedUrl', () => {
     // 署名付きURLのアップロード方法がわからない。
     it.skip('アップロード用の署名付きURLを生成する', async () => {
       const uploadFileName = 'generateV4ReadSignedUrl/upload.txt';
