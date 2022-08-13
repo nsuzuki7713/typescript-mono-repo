@@ -1,4 +1,4 @@
-import { Storage, UploadOptions } from '@google-cloud/storage';
+import { DownloadOptions, FileOptions, Storage, UploadOptions } from '@google-cloud/storage';
 
 /**
  * オブジェクト周りを操作するクラス
@@ -19,9 +19,38 @@ export class GcpObject {
    * @param filePath アップロードするファイルのローカルパス
    * @param options オプション
    * @see API {@link https://googleapis.dev/nodejs/storage/latest/Bucket.html#upload}
+   * @see オブジェクトの命名ガイドライン {@link https://cloud.google.com/storage/docs/naming-objects}
    */
   async uploadFile(filePath: string, options?: UploadOptions) {
     await this.bucket.upload(filePath, options);
+  }
+
+  /**
+   * メモリからオブジェクトをアップロードする
+   *
+   * @param fileName ファイル名
+   * @param content ファイルのコンテンツ
+   * @param options ファイルオプション
+   * @see API {@link https://googleapis.dev/nodejs/storage/latest/File.html#save}
+   */
+  async uploadFromMemory(fileName: string, content: string, options?: FileOptions) {
+    await this.bucket.file(fileName, options).save(content);
+  }
+
+  /**
+   * オブジェクトをダウンロードする
+   *
+   * @param fileName ファイル名
+   * @param options オプション
+   */
+  async downloadFile(fileName: string, options?: DownloadOptions): Promise<string | undefined> {
+    const [file] = await this.bucket.file(fileName).download(options);
+
+    if (options?.destination) {
+      return undefined;
+    }
+
+    return file.toString();
   }
 
   /**
