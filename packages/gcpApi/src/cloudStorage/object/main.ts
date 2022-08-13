@@ -1,4 +1,5 @@
 import {
+  DeleteFileOptions,
   DeleteFilesOptions,
   DownloadOptions,
   FileExistsOptions,
@@ -8,7 +9,6 @@ import {
   Storage,
   UploadOptions,
 } from '@google-cloud/storage';
-import { ExistsOptions } from '@google-cloud/storage/build/src/nodejs-common/service-object';
 
 /**
  * オブジェクト周りを操作するクラス
@@ -48,14 +48,16 @@ export class GcpObject {
   }
 
   /**
-   * オブジェクトをダウンロードする
+   * オブジェクトをダウンロードする。
+   * destinationを指定している場合、ローカルに保存する。指定がない場合、オブジェクトの中身を文字列として返す。
    *
    * @param fileName ファイル名
    * @param options オプション
    * @see API {@link https://googleapis.dev/nodejs/storage/latest/File.html#download}
    */
   async downloadFile(fileName: string, options?: DownloadOptions): Promise<string | undefined> {
-    const [file] = await this.bucket.file(fileName).download(options);
+    // optionsをそのまま渡すとundefinedになってしますのでオブジェクトをコピーして渡す。
+    const [file] = await this.bucket.file(fileName).download({ ...options });
 
     if (options?.destination) {
       return undefined;
@@ -81,6 +83,7 @@ export class GcpObject {
    *
    * @param srcFileName コピー元のファイル名
    * @param destFileName コピー先のファイル名
+   * @see API {@link https://googleapis.dev/nodejs/storage/latest/File.html#copy}
    */
   async copyFile(srcFileName: string, destFileName: string) {
     const [file] = await this.bucket.file(srcFileName).copy(destFileName);
@@ -104,8 +107,8 @@ export class GcpObject {
   /**
    * オブジェクトを移動する
    *
-   * @param srcFileName
-   * @param destFileName
+   * @param srcFileName 移動元のファイル名
+   * @param destFileName 移動先のファイル名
    * @see API {@link https://googleapis.dev/nodejs/storage/latest/File.html#move}
    */
   async moveFile(srcFileName: string, destFileName: string) {
@@ -115,16 +118,20 @@ export class GcpObject {
   }
 
   /**
+   * 引数で指定したオブジェクトを削除する
    *
-   * @param fileName
+   * @param fileName ファイル名
+   * @param options オプション
+   * @see API {@link https://googleapis.dev/nodejs/storage/latest/File.html#delete}
    */
-  async deleteFile(fileName: string) {
-    await this.bucket.file(fileName).delete();
+  async deleteFile(fileName: string, options?: DeleteFileOptions) {
+    await this.bucket.file(fileName).delete(options);
   }
 
   /**
+   * ダウンロード用の署名付きURLを取得する
    *
-   * @param fileName
+   * @param fileName ファイル名
    * @see API {@link https://googleapis.dev/nodejs/storage/latest/File.html#getSignedUrl}
    */
   async generateV4ReadSignedUrl(fileName: string) {
@@ -140,14 +147,17 @@ export class GcpObject {
   }
 
   /**
+   * アップロード用の署名付きURLを取得する
+   * contentType: 'text/plain' を設定する。
    *
-   * @param fileName
+   * @param fileName ファイル名
+   * @see API {@link https://googleapis.dev/nodejs/storage/latest/File.html#getSignedUrl}
    */
   async generateV4UploadSignedUrl(fileName: string) {
     const options: GetSignedUrlConfig = {
       version: 'v4',
       action: 'write',
-      expires: Date.now() + 10 * 60 * 1000, // 10 minutes
+      expires: Date.now() + 1 * 60 * 1000, // 1 minutes
       contentType: 'text/plain',
     };
 
@@ -157,17 +167,21 @@ export class GcpObject {
   }
 
   /**
+   * 複数のオブジェクトを削除する
    *
-   * @param query
+   * @param query クエリ
+   * @see API {@link https://googleapis.dev/nodejs/storage/latest/Bucket.html#deleteFiles}
    */
-  async deleteFiles(query: DeleteFilesOptions) {
+  async deleteFiles(query?: DeleteFilesOptions) {
     await this.bucket.deleteFiles(query);
   }
 
   /**
+   * オブジェクトが存在するかの検証をする
    *
-   * @param fileName
-   * @param options
+   * @param fileName ファイル名
+   * @param options オプション
+   * @see API {@link https://googleapis.dev/nodejs/storage/latest/File.html#exists}
    */
   async existsFile(fileName: string, options?: FileExistsOptions) {
     const [exists] = await this.bucket.file(fileName).exists(options);
