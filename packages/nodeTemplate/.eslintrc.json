@@ -31,6 +31,61 @@
     // TypeScript なので引数の型の説明はオフにする
     "jsdoc/require-param-type": "off",
     // TypeScript なので返り値の型の説明オフにする
-    "jsdoc/require-returns-type": "off"
+    "jsdoc/require-returns-type": "off",
+    // https://note.com/sanehisa_rakus/n/n5f007c0a5124
+    "@typescript-eslint/naming-convention": [
+      "error",
+      // ver,let,constはstrictCamelCaseを使用
+      {
+        "selector": "variable",
+        "format": ["strictCamelCase"]
+      },
+      // constはStrictPascalCase,UPPER_CASEを許容
+      {
+        "selector": "variable",
+        "modifiers": ["const"],
+        "format": ["strictCamelCase", "UPPER_CASE"]
+      },
+      {
+        "selector": "property",
+        "format": ["strictCamelCase", "UPPER_CASE"]
+      },
+      // 関数はstrictCamelCaseを使用
+      {
+        "selector": "function",
+        "format": ["strictCamelCase"]
+      },
+      // 関数はstrictCamelCaseを使用
+      {
+        "selector": "method",
+        "format": ["strictCamelCase"]
+      },
+      // get,setはstrictCamelCaseを使用
+      {
+        "selector": "accessor",
+        "format": ["strictCamelCase"]
+      },
+      // 関数パラメーターはstrictCamelCaseを使用、先頭のアンダースコア許容
+      {
+        "selector": "parameter",
+        "format": ["strictCamelCase"],
+        "leadingUnderscore": "allow"
+      },
+      // typeはStrictPascalCase
+      {
+        "selector": "typeAlias",
+        "format": ["StrictPascalCase"]
+      },
+      // classはStrictPascalCaseを使用
+      {
+        "selector": "class",
+        "format": ["StrictPascalCase"]
+      },
+      // interfaceはStrictPascalCaseを使用
+      {
+        "selector": "interface",
+        "format": ["StrictPascalCase"]
+      }
+    ]
   }
 }
