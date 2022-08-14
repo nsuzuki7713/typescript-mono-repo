@@ -5,8 +5,8 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "lint": "eslint --ext .ts",
-    "lint:fix": "eslint --fix  --ext .ts",
+    "lint": "eslint --ext .ts src/",
+    "lint:fix": "eslint --fix  --ext .ts src/",
     "test": "jest"
   },
   "devDependencies": {
