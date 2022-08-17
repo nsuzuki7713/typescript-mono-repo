@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "strict": true,
+    // ファイルの文字列の大文字小文字を区別する
+    "forceConsistentCasingInFileNames": true,
+    // インデックス型や配列で宣言されたオブジェクトが持つプロパティへのアクセスを厳密に評価する
+    "noUncheckedIndexedAccess": true,
+    // スーパークラスのメソッドをオーバーライドする時、overrideを必須にする
+    "noImplicitOverride": true,
+    // witch文で、caseをbreakやreturnで終了する
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "sourceMap": true
+  },
+  "include": ["src/**/*"]
+}
