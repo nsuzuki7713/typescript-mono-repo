@@ -1,9 +1,24 @@
 import axios from 'axios';
 import { Users } from './users';
+import defaultExport, { bar, foo } from './foo-bar-baz';
 
 jest.mock('axios');
 // 型をつける
 const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+// itの中にいれたら動かなかった
+jest.mock('./foo-bar-baz', () => {
+  const originalModule = jest.requireActual('./foo-bar-baz');
+
+  //Mock the default export and named export 'foo'
+  return {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    __esModule: true,
+    ...originalModule,
+    default: jest.fn(() => 'mocked baz'),
+    foo: 'mocked foo',
+  };
+});
 
 describe('モック関数', () => {
   it('モック関数を利用する', () => {
@@ -46,5 +61,13 @@ describe('モック関数', () => {
     // mockedAxios.get.mockImplementation(() => Promise.resolve(resp));
 
     await expect(Users.all()).resolves.toEqual(users);
+  });
+
+  it('部分的なモック', () => {
+    const defaultExportResult = defaultExport();
+    expect(defaultExportResult).toBe('mocked baz');
+    expect(defaultExport).toHaveBeenCalled();
+    expect(foo).toBe('mocked foo');
+    expect(bar()).toBe('bar');
   });
 });
