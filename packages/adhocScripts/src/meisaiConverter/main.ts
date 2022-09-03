@@ -40,7 +40,7 @@ function convertMeisaiText(meisaiText: string) {
       year,
       month,
       day,
-      Number(...items.slice(1, 2)) * -1,
+      Number(...items.slice(1, 2)),
       ...items.slice(2, 5),
       convertUse(items[2]!, items[3]!),
     ].join('\t');
