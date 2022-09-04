@@ -86,6 +86,7 @@
         "selector": "interface",
         "format": ["StrictPascalCase"]
       }
-    ]
+    ],
+    "jest/no-disabled-tests": "off"
   }
 }
