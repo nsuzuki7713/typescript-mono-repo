@@ -1,13 +1,18 @@
 import * as fs from 'fs';
 import * as iconv from 'iconv-lite';
+import { GoogleSpreadsheet } from 'google-spreadsheet';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 /**
  * meisai.csv を convertMeisai.csv に変換する
  */
-function main() {
+async function main() {
   const meisaiText = readMeisaiFile();
   const convertedMeisaiText = convertMeisaiText(meisaiText);
   createFile(convertedMeisaiText);
+  await syncSpreadSheet(convertedMeisaiText);
 }
 
 /**
@@ -88,4 +93,29 @@ function createFile(body: string[]) {
   });
 }
 
-main();
+/**
+ * スプレットシートにデータを反映する。
+ *
+ * @param rows スプレットシートの行に追加する値
+ */
+async function syncSpreadSheet(rows: string[]) {
+  const doc = new GoogleSpreadsheet(process.env.SHEET_ID);
+
+  await doc.useServiceAccountAuth({
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ?? '',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    private_key: (process.env.GOOGLE_PRIVATE_KEY ?? '').replace(/\\n/g, '\n'),
+  });
+  await doc.loadInfo();
+
+  const sheet = doc.sheetsByTitle['三井住友'];
+
+  if (!sheet) {
+    throw new Error('sheet not found');
+  }
+
+  await sheet.addRows(rows.map((row) => row.split('\t').map((v) => v.replaceAll('"', ''))));
+}
+
+main().catch((e) => console.error(e));
