@@ -1,7 +1,11 @@
 import { faker } from '@faker-js/faker';
 import * as fs from 'fs';
+import { generate } from 'csv/sync';
 
-async function main() {
+/**
+ * faker.js を使用して、大きなファイルを出力するサンプル
+ */
+async function createJsonFile() {
   faker.setLocale('ja');
   const fileName = `${__dirname}/test.json`;
 
@@ -21,5 +25,25 @@ async function main() {
 
   fs.writeFileSync(fileName, JSON.stringify(data));
 }
+// createJsonFile().catch((e) => console.error(e));
 
-main().catch((e) => console.error(e));
+/**
+ * csv/sync を使用して、大きなファイルを出力するサンプル
+ */
+function createCsvFile() {
+  const fileName = `${__dirname}/test.csv`;
+  fs.writeFileSync(fileName, generate({ length: 10000 }));
+}
+createCsvFile();
+
+// メモリを計測する
+let maxMemory = 0;
+process.nextTick(() => {
+  const memUsage = process.memoryUsage();
+  if (memUsage.rss > maxMemory) {
+    maxMemory = memUsage.rss;
+  }
+});
+process.on('exit', () => {
+  console.log(`Max memory: ${maxMemory / 1024 / 1024}MB`);
+});
