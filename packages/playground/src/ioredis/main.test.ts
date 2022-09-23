@@ -1,10 +1,14 @@
 import { RedisClient } from './main';
 
+// redis-server が起動していることを前提
 describe('RedisClient', () => {
   let redisClient: RedisClient;
 
   beforeAll(async () => {
     redisClient = new RedisClient();
+  });
+  beforeEach(async () => {
+    await redisClient.flushall();
   });
   afterAll(async () => {
     // Redis へのコネクションを切らないと、Jest が修了しない
@@ -49,6 +53,47 @@ describe('RedisClient', () => {
       await redisClient.set('key', Buffer.from('123'));
 
       await expect(redisClient.get('key')).resolves.toBe('123');
+    });
+  });
+
+  describe('pipeline', () => {
+    it('コマンドを一括して送信できる', async () => {
+      const params = [
+        { key: 'pipelineKey1', value: 'pipelineValue1' },
+        { key: 'pipelineKey2', value: 'pipelineValue2' },
+        { key: 'pipelineKey3', value: 'pipelineValue3' },
+      ];
+
+      await redisClient.pipeline(params);
+
+      await expect(redisClient.get('pipelineKey1')).resolves.toBe('pipelineValue1');
+      await expect(redisClient.get('pipelineKey2')).resolves.toBe('pipelineValue2');
+      await expect(redisClient.get('pipelineKey3')).resolves.toBe('pipelineValue3');
+    });
+  });
+
+  describe('delete', () => {
+    it('キーを指定して、値を削除できる', async () => {
+      const key = 'key';
+      const value = 'value';
+      await redisClient.set(key, value);
+
+      await expect(redisClient.delete(key)).resolves.toBe(1);
+      await expect(redisClient.get(key)).resolves.toBeNull();
+    });
+
+    it('削除対象のキーが存在しない場合、0を返す', async () => {
+      await expect(redisClient.delete('notExistKey')).resolves.toBe(0);
+    });
+  });
+
+  describe('listPush', () => {
+    it('リスト型を作成して値を追加できる', async () => {
+      const values = ['value1', 'value2', 'value3'];
+
+      await redisClient.listPush('listKey', values);
+
+      await expect(redisClient.getList('listKey')).resolves.toEqual(values);
     });
   });
 });
