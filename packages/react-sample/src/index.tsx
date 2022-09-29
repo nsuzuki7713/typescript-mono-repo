@@ -5,15 +5,29 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import Hello from './components/Hello';
 import Name from './components/Name';
+import Message from './components/Message';
+import Parent from './components/ContainerSample';
+import Page from './components/ContextSample';
+import Counter from './components/Counter';
+import Counter2 from './components/Counter2';
+import { ParentMemo } from './components/Parent';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
+  <div>
     {/* <App /> */}
     <Hello />
     <Name />
+    <Message />
+    <Parent />
+    <Page />
+    <Counter  initialValue={1}/>
+    <Counter2 initialValue={1}/>
+    <ParentMemo />
+  </div>
   </React.StrictMode>
 );
 
