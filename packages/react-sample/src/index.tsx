@@ -11,6 +11,7 @@ import Page from './components/ContextSample';
 import Counter from './components/Counter';
 import Counter2 from './components/Counter2';
 import { ParentMemo } from './components/Parent';
+import { Parent2 } from './components/UseCallbackParent';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -27,6 +28,7 @@ root.render(
     <Counter  initialValue={1}/>
     <Counter2 initialValue={1}/>
     <ParentMemo />
+    <Parent2 />
   </div>
   </React.StrictMode>
 );
