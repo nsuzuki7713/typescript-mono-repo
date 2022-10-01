@@ -13,6 +13,7 @@ async function main() {
   const convertedMeisaiText = convertMeisaiText(meisaiText);
   createFile(convertedMeisaiText);
   await syncSpreadSheet(convertedMeisaiText);
+  console.log(`url: https://docs.google.com/spreadsheets/d/${process.env.SHEET_ID}`);
 }
 
 /**
