@@ -1,0 +1,21 @@
+{
+    "name": "HELLO WORLD",
+    "description": "chrome拡張機能の基礎",
+    "version": "1.0",
+    "manifest_version": 3,
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "js": ["content.js"],
+            "matches": ["https://qiita.com/*"]
+        },
+        {
+            "js": ["githubContent.js"],
+            "matches": ["https://github.com/*/pull/*"],
+            "run_at": "document_end",
+            "all_frames": true
+        }
+    ]
+}
