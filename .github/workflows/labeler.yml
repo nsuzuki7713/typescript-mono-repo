@@ -1,0 +1,5 @@
+adhocScripts:
+  - packages/adhocScripts/**/*
+
+at-coder:
+  - packages/at-coder/**/*
