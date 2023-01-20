@@ -15,7 +15,9 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "sourceMap": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
   },
   "include": ["src/**/*"]
 }
