@@ -71,3 +71,9 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+## メモ
+
+`ngrok http 3000`
+
+`curl -X POST -H "Content-Type: application/json" -d '{"name" : "佐藤" , "mail" : "sato@example.com"}' localhost:3000/line-webhook`
