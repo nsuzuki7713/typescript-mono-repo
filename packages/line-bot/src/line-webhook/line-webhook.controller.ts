@@ -39,6 +39,7 @@ export class LineWebhookController {
         // メッセージイベント
         // https://developers.line.biz/ja/reference/messaging-api/#message-event
         case 'message': {
+          console.log(`userId: ${event.source.userId}`);
           this.processMessage(event.message);
           break;
         }
