@@ -40,6 +40,7 @@ export class LineWebhookController {
         // https://developers.line.biz/ja/reference/messaging-api/#message-event
         case 'message': {
           console.log(`userId: ${event.source.userId}`);
+          console.log(`応答トークン: ${event.replyToken}`);
           this.processMessage(event.message);
           break;
         }
@@ -69,11 +70,14 @@ export class LineWebhookController {
         case 'postback': {
           // 日時選択アクションやリッチメニューのアクションなど
           console.log('ポストバックイベント');
+          console.log(JSON.stringify(event));
+          break;
         }
 
         // https://developers.line.biz/ja/reference/messaging-api/#account-link-event
         case 'accountLink': {
           console.log('アカウント連携イベント');
+          break;
         }
       }
     }
