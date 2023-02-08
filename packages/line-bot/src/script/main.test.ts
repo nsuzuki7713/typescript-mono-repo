@@ -253,4 +253,76 @@ describe('line api', () => {
 
     console.log(defalutRichMenuId);
   });
+
+  describe('メッセージオブジェクト', () => {
+    it.skip('テキストメッセージ', async () => {
+      const message: line.TextMessage = {
+        type: 'text',
+        text: 'Hello push message2',
+      };
+
+      await client.pushMessage(userId, message);
+    });
+
+    it.skip('スタンプメッセージ', async () => {
+      const message: line.StickerMessage = {
+        type: 'sticker',
+        packageId: '446',
+        stickerId: '1988',
+      };
+
+      await client.pushMessage(userId, message);
+    });
+
+    it.skip('画像メッセージ', async () => {
+      const message: line.ImageMessage = {
+        type: 'image',
+        originalContentUrl:
+          'https://1.bp.blogspot.com/-tVeC6En4e_E/X96mhDTzJNI/AAAAAAABdBo/jlD_jvZvMuk3qUcNjA_XORrA4w3lhPkdQCNcBGAsYHQ/s1048/onepiece01_luffy.png',
+        previewImageUrl:
+          'https://1.bp.blogspot.com/-tVeC6En4e_E/X96mhDTzJNI/AAAAAAABdBo/jlD_jvZvMuk3qUcNjA_XORrA4w3lhPkdQCNcBGAsYHQ/s1048/onepiece01_luffy.png',
+      };
+
+      await client.pushMessage(userId, message);
+    });
+
+    it.skip('位置情報メッセージ', async () => {
+      const message: line.LocationMessage = {
+        type: 'location',
+        title: '東京新宿',
+        address: '〒160-0004 東京都新宿区四谷一丁目6番1号',
+        latitude: 35.687574,
+        longitude: 139.72922,
+      };
+
+      await client.pushMessage(userId, message);
+    });
+
+    it.skip('イメージマップメッセージ', async () => {
+      const message: line.ImageMapMessage = {
+        type: 'imagemap',
+        baseUrl:
+          'https://1.bp.blogspot.com/-tVeC6En4e_E/X96mhDTzJNI/AAAAAAABdBo/jlD_jvZvMuk3qUcNjA_XORrA4w3lhPkdQCNcBGAsYHQ/s1048/onepiece01_luffy.png',
+        altText: 'This is an imagemap',
+        baseSize: {
+          width: 1040,
+          height: 1040,
+        },
+        actions: [
+          {
+            type: 'message',
+            text: 'Hello',
+            area: {
+              x: 0,
+              y: 0,
+              width: 520,
+              height: 454,
+            },
+          },
+        ],
+      };
+
+      await client.pushMessage(userId, message);
+    });
+  });
 });
