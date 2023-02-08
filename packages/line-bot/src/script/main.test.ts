@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import * as line from '@line/bot-sdk';
 import * as jose from 'node-jose';
+import * as fs from 'fs';
 
 describe('line api', () => {
   const client = new line.Client({
@@ -97,7 +98,7 @@ describe('line api', () => {
     await client.pushMessage(userId, message);
   });
 
-  it('クイックリプライのメッセージ', async () => {
+  it.skip('クイックリプライのメッセージ', async () => {
     const message: line.TextMessage = {
       type: 'text',
       text: 'Hello push message',
@@ -171,5 +172,85 @@ describe('line api', () => {
     };
 
     await client.pushMessage(userId, message);
+  });
+
+  it.skip('リッチメニューを作成する', async () => {
+    // https://developers.line.biz/ja/reference/messaging-api/#create-rich-menu
+    const richmenu: line.RichMenu = {
+      size: {
+        width: 2500,
+        height: 1686,
+      },
+      selected: true,
+      name: 'apiから作成したリッチメニュー',
+      chatBarText: 'APIから作成したよ',
+      areas: [
+        {
+          bounds: {
+            x: 0,
+            y: 0,
+            width: 2500,
+            height: 1686,
+          },
+          action: {
+            type: 'message',
+            label: 'メッセージ',
+            text: 'メッセージだよ',
+          },
+        },
+      ],
+    };
+    const richMenuId = await client.createRichMenu(richmenu);
+
+    console.log(richMenuId);
+  });
+
+  it.skip('リッチメニューの配列を取得する', async () => {
+    // https://developers.line.biz/ja/reference/messaging-api/#get-rich-menu-list
+    const rechmenus = await client.getRichMenuList();
+
+    console.log(rechmenus);
+  });
+
+  it.skip('リッチメニューを削除する', async () => {
+    const richMenuId = '';
+    await client.deleteRichMenu(richMenuId);
+  });
+
+  it.skip('リッチメニューの画像をアップロードする', async () => {
+    // https://developers.line.biz/ja/reference/messaging-api/#upload-rich-menu-image
+    const richMenuId = 'richmenu-fd3f15b59afcc6665305715a34152788';
+    await client.setRichMenuImage(
+      richMenuId,
+      fs.createReadStream('./src/script/images/richmenu-template-guide-07.png'),
+    );
+  });
+
+  it.skip('リッチメニューの画像をダウンロードする', async () => {
+    // https://developers.line.biz/ja/reference/messaging-api/#download-rich-menu-image
+    const richMenuId = '';
+    const stream = await client.getRichMenuImage(richMenuId);
+    stream.pipe(fs.createWriteStream('large-file.png'));
+  });
+
+  it.skip('リッチメニューを取得する', async () => {
+    // https://developers.line.biz/ja/reference/messaging-api/#get-rich-menu
+    const richMenuId = 'richmenu-fd3f15b59afcc6665305715a34152788';
+    const richMenu = await client.getRichMenu(richMenuId);
+
+    console.log(richMenu);
+  });
+
+  it.skip('デフォルトのリッチメニューを設定する', async () => {
+    // https://developers.line.biz/ja/reference/messaging-api/#set-default-rich-menu
+    const richMenuId = 'richmenu-fd3f15b59afcc6665305715a34152788';
+
+    await client.setDefaultRichMenu(richMenuId);
+  });
+
+  it.skip('デフォルトのリッチメニューのIDを取得する', async () => {
+    const defalutRichMenuId = await client.getDefaultRichMenuId();
+
+    console.log(defalutRichMenuId);
   });
 });
