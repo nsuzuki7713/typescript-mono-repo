@@ -2,6 +2,7 @@ import 'dotenv/config';
 import * as line from '@line/bot-sdk';
 import * as jose from 'node-jose';
 import * as fs from 'fs';
+import axios from 'axios';
 
 describe('line api', () => {
   const client = new line.Client({
@@ -324,5 +325,78 @@ describe('line api', () => {
 
       await client.pushMessage(userId, message);
     });
+  });
+
+  it.skip('ユーザーのアクセストークンの有効性を検証する', async () => {
+    const access_token = '';
+
+    // https://developers.line.biz/ja/reference/line-login/#verify-access-token
+    const url = `https://api.line.me/oauth2/v2.1/verify?access_token=${access_token}`;
+
+    const res = await axios.get(url);
+
+    console.log(res.data);
+  });
+
+  it.skip('ユーザーのIDトークンを検証する', async () => {
+    const id_token = '';
+
+    try {
+      // https://developers.line.biz/ja/reference/line-login/#verify-id-token
+      const res = await axios.post(
+        'https://api.line.me/oauth2/v2.1/verify',
+        {
+          id_token,
+          client_id: process.env['LINE_LOGIN_CHANEL'],
+        },
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        },
+      );
+
+      console.log(res.data);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+
+  it('ユーザー情報を取得する', async () => {
+    const access_token = '';
+
+    try {
+      // https://developers.line.biz/ja/reference/line-login/#userinfo
+      const res = await axios.post(
+        'https://api.line.me/oauth2/v2.1/userinfo',
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        },
+      );
+
+      console.log(res.data);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+
+  it('ユーザープロフィールを取得する', async () => {
+    const access_token = '';
+
+    try {
+      // https://developers.line.biz/ja/reference/line-login/#get-user-profile
+      const res = await axios.get('https://api.line.me/v2/profile', {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+
+      console.log(res.data);
+    } catch (e) {
+      console.log(e);
+    }
   });
 });
