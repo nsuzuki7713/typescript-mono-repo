@@ -8,7 +8,7 @@ export class LineLoginController {
   constructor(private configService: ConfigService) {}
 
   @Get()
-  // @Redirect()
+  @Redirect('')
   getLoginUrl() {
     console.log('getLoginUrl');
     const response_type = 'code';
@@ -20,7 +20,7 @@ export class LineLoginController {
     const scope = 'profile%20openid';
 
     return {
-      uri: `https://access.line.me/oauth2/v2.1/authorize?response_type=${response_type}&client_id=${client_id}&redirect_uri=${redirect_uri}&state=${state}&scope=${scope}`,
+      url: `https://access.line.me/oauth2/v2.1/authorize?response_type=${response_type}&client_id=${client_id}&redirect_uri=${redirect_uri}&state=${state}&scope=${scope}`,
     };
   }
 
