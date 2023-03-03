@@ -1,13 +1,23 @@
 version: '3.9'
 
 services:
-  mysql:
-    image: mysql:8.0.28
-    platform: linux/amd64
-    container_name: mysql-container
+  # mysql:
+  #   image: mysql:8.0.28
+  #   platform: linux/amd64
+  #   container_name: mysql-container
+  #   ports:
+  #     - '3306:3306'
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: root
+  #     MYSQL_DATABASE: root
+  #     TZ: 'Asia/Tokyo'
+
+  localstack:
+    image: localstack/localstack
+    container_name: localstack
     ports:
-      - '3306:3306'
+      - '4566:4566'
+      - '4571:4571'
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: root
-      TZ: 'Asia/Tokyo'
+      # https://docs.localstack.cloud/references/configuration/
+      - DEBUG=${DEBUG-}
