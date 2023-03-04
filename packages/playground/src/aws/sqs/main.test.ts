@@ -3,13 +3,22 @@ import { Client } from './main';
 process.env.LOCAL_TEST = 'http://localhost:4566';
 
 describe('Client', () => {
-  const sqsClient = new Client();
+  let sqsClient: Client;
+
+  beforeAll(async () => {
+    const queueName = 'local-test-queue';
+    await Client.CreateSqsQueue(queueName);
+
+    sqsClient = new Client(queueName);
+  });
 
   describe('sendMessageToQueue', () => {
-    it.skip('メッセージを送信できる', async () => {
-      await sqsClient.sendMessageToQueue();
+    it('メッセージを送信できる', async () => {
+      const message = 'send message';
 
-      expect(1).toBe(1);
+      await sqsClient.sendMessageToQueue(message);
+
+      await expect(sqsClient.receiveMessagesFromQueue()).resolves.toBe(message);
     });
   });
 
@@ -23,14 +32,14 @@ describe('Client', () => {
 
   describe('createSqsQueue', () => {
     it.skip('キューを作成できる', async () => {
-      await sqsClient.createSqsQueue();
+      await Client.CreateSqsQueue('test');
 
       expect(1).toBe(1);
     });
   });
 
   describe('listQueues', () => {
-    it('キューの一覧を取得できる', async () => {
+    it.skip('キューの一覧を取得できる', async () => {
       await sqsClient.listQueues();
 
       expect(1).toBe(1);
@@ -39,8 +48,13 @@ describe('Client', () => {
 
   describe('getQueueAttributes', () => {
     it('メッセージ数を取得できる', async () => {
-      await sqsClient.getQueueAttributes('http://localhost:4566/000000000000/my-sqs-queue');
-      expect(1).toBe(1);
+      await sqsClient.sendMessageToQueue('test');
+      await sqsClient.sendMessageToQueue('test2');
+
+      await expect(sqsClient.getQueueAttributes()).resolves.toBe(2);
+
+      // メッセージを削除する
+      await sqsClient.receiveMessagesFromQueue();
     });
   });
 });

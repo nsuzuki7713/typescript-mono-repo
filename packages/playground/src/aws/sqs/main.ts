@@ -8,26 +8,31 @@ import {
   GetQueueAttributesCommand,
 } from '@aws-sdk/client-sqs';
 
+function createSQSClient() {
+  return new SQSClient({
+    ...(process.env.LOCAL_TEST && { endpoint: process.env.LOCAL_TEST }),
+  });
+}
+
 /**
  *
  */
 export class Client {
   private sqsClient: SQSClient;
-  private queueUrl = 'testQueue';
 
-  constructor() {
-    this.sqsClient = new SQSClient({
-      ...(process.env.LOCAL_TEST && { endpoint: process.env.LOCAL_TEST }),
-    });
+  constructor(private queueUrl: string) {
+    this.sqsClient = createSQSClient();
   }
 
   /**
    * キューにメッセージを送信する
+   *
+   * @param message
    */
-  async sendMessageToQueue() {
+  async sendMessageToQueue(message: string) {
     const params = {
-      QueueUrl: 'my-sqs-queue',
-      MessageBody: 'your-message-body',
+      QueueUrl: this.queueUrl,
+      MessageBody: message,
     };
 
     const command = new SendMessageCommand(params);
@@ -46,7 +51,7 @@ export class Client {
   async receiveMessagesFromQueue() {
     // メッセージ受信コマンドの作成
     const receiveMessageCommand = new ReceiveMessageCommand({
-      QueueUrl: 'my-sqs-queue',
+      QueueUrl: this.queueUrl,
       // 一度に受信するメッセージの最大数
       MaxNumberOfMessages: 10,
       // メッセージを処理中にする時間（秒）
@@ -64,11 +69,13 @@ export class Client {
 
           // 受信したメッセージを削除する
           const deleteCommand = new DeleteMessageCommand({
-            QueueUrl: 'my-sqs-queue',
+            QueueUrl: this.queueUrl,
             ReceiptHandle: message.ReceiptHandle,
           });
           await this.sqsClient.send(deleteCommand);
           console.log(`Message deleted`);
+
+          return message.Body;
         }
       } else {
         console.log('No messages received from queue.');
@@ -80,15 +87,15 @@ export class Client {
 
   /**
    * キューを作成する
+   *
+   * @param queueName
    */
-  async createSqsQueue() {
+  static async CreateSqsQueue(queueName: string): Promise<string | undefined> {
     try {
-      const queueName = 'my-sqs-queue';
-      const createQueueParams = { QueueName: queueName };
-      const command = new CreateQueueCommand(createQueueParams);
-      const response = await this.sqsClient.send(command);
-      const queueUrl = response.QueueUrl;
-      console.log(`SQS queue created with URL: ${queueUrl}`);
+      const command = new CreateQueueCommand({ QueueName: queueName });
+      const response = await createSQSClient().send(command);
+
+      return response.QueueUrl;
     } catch (err) {
       console.error(err);
     }
@@ -104,6 +111,7 @@ export class Client {
       console.log(response.QueueUrls);
     } catch (err) {
       console.error(err);
+      throw err;
     }
   }
 
@@ -112,15 +120,17 @@ export class Client {
    *
    * @param queueUrl
    */
-  async getQueueAttributes(queueUrl: string): Promise<void> {
+  async getQueueAttributes(): Promise<number | undefined> {
     try {
       const command = new GetQueueAttributesCommand({
-        QueueUrl: queueUrl,
+        QueueUrl: this.queueUrl,
         AttributeNames: ['ApproximateNumberOfMessages'],
       });
       const response = await this.sqsClient.send(command);
       const approxNumOfMessages = response.Attributes?.ApproximateNumberOfMessages;
       console.log(`Approximate number of messages in the queue: ${approxNumOfMessages}`);
+
+      return Number(approxNumOfMessages);
     } catch (err) {
       console.error(err);
     }

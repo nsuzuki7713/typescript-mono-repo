@@ -51,15 +51,15 @@
       //   "format": ["strictCamelCase", "UPPER_CASE"]
       // },
       // 関数はstrictCamelCaseを使用
-      {
-        "selector": "function",
-        "format": ["strictCamelCase"]
-      },
+      // {
+      //   "selector": "function",
+      //   "format": ["strictCamelCase"]
+      // },
       // 関数はstrictCamelCaseを使用
-      {
-        "selector": "method",
-        "format": ["strictCamelCase"]
-      },
+      // {
+      //   "selector": "method",
+      //   "format": ["strictCamelCase"]
+      // },
       // get,setはstrictCamelCaseを使用
       {
         "selector": "accessor",
