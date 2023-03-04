@@ -1,7 +1,7 @@
 import { S3 } from '@aws-sdk/client-s3';
 
 const s3 = new S3({
-  endpoint: 'http://localhost:4566',
+  // endpoint: 'http://localhost:4566',
 });
 
 (async () => {

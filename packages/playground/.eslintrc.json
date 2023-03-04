@@ -46,10 +46,10 @@
         "modifiers": ["const"],
         "format": ["strictCamelCase", "UPPER_CASE"]
       },
-      {
-        "selector": "property",
-        "format": ["strictCamelCase", "UPPER_CASE"]
-      },
+      // {
+      //   "selector": "property",
+      //   "format": ["strictCamelCase", "UPPER_CASE"]
+      // },
       // 関数はstrictCamelCaseを使用
       {
         "selector": "function",
