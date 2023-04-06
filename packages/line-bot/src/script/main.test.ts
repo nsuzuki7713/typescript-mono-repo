@@ -94,7 +94,6 @@ describe('line api', () => {
       type: 'text',
       text: 'Hello push message',
     } as const;
-    const userId = '';
 
     await client.pushMessage(userId, message);
   });
@@ -303,11 +302,11 @@ describe('line api', () => {
       const message: line.ImageMapMessage = {
         type: 'imagemap',
         baseUrl:
-          'https://1.bp.blogspot.com/-tVeC6En4e_E/X96mhDTzJNI/AAAAAAABdBo/jlD_jvZvMuk3qUcNjA_XORrA4w3lhPkdQCNcBGAsYHQ/s1048/onepiece01_luffy.png',
+          'https://line-image-20230406.s3.ap-northeast-1.amazonaws.com/onepiece01_luffy2',
         altText: 'This is an imagemap',
         baseSize: {
           width: 1040,
-          height: 1040,
+          height: 585,
         },
         actions: [
           {

@@ -8,9 +8,9 @@ const s3 = new S3Client({});
 const widths = [240, 300, 460, 700, 1040];
 
 // バケット名とファイル名を指定
-const bucketName = '20220218-suzuki-test';
-const originalKey = 'test.png';
-const resizedKey = `test`;
+const bucketName = 'line-image-20230406';
+const originalKey = 'onepiece01_luffy2.png';
+const resizedKey = `onepiece01_luffy2`;
 
 const resizeImage = async () => {
   try {
