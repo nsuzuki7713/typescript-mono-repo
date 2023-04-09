@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PhotoRepositoryService } from './photo.repository';
 
 /**
@@ -7,6 +7,13 @@ import { PhotoRepositoryService } from './photo.repository';
 @Injectable()
 export class AppService {
   constructor(private photoRepositoryService: PhotoRepositoryService) {}
+
+  // constructor(
+  //   private photoRepositoryService: PhotoRepositoryService,
+  //   @Inject('TEST') private test: string,
+  // ) {
+  //   console.log(test);
+  // }
 
   async getHello() {
     await this.photoRepositoryService.create();

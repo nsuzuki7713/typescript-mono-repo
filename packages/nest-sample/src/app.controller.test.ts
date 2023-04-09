@@ -12,6 +12,7 @@ describe('AppController', () => {
       providers: [
         AppService,
         { provide: PhotoRepositoryService, useClass: PhotoMockRepository },
+        { provide: 'TEST', useValue: '12345' },
       ],
     }).compile();
 
