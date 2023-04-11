@@ -87,6 +87,7 @@
         "format": ["StrictPascalCase"]
       }
     ],
-    "jest/no-disabled-tests": "off"
+    "jest/no-disabled-tests": "off",
+    "jest/expect-expect": "off"
   }
 }
