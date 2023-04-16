@@ -24,9 +24,20 @@ describe('Octokitを使ってGitHub APIを操作する', () => {
     const res = await octokit.rest.pulls.get({
       owner,
       repo,
-      pull_number: 178,
+      pull_number: 204,
     });
 
     console.log(res.data);
+  });
+
+  it.only('レビューの情報を取得する', async () => {
+    // https://docs.github.com/ja/rest/pulls/reviews?apiVersion=2022-11-28#list-reviews-for-a-pull-request
+    const { data: reviews } = await octokit.rest.pulls.listReviews({
+      owner,
+      repo,
+      pull_number: 204,
+    });
+
+    console.log(reviews);
   });
 });
