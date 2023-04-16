@@ -30,7 +30,7 @@ describe('Octokitを使ってGitHub APIを操作する', () => {
     console.log(res.data);
   });
 
-  it.only('レビューの情報を取得する', async () => {
+  it('レビューの情報を取得する', async () => {
     // https://docs.github.com/ja/rest/pulls/reviews?apiVersion=2022-11-28#list-reviews-for-a-pull-request
     const { data: reviews } = await octokit.rest.pulls.listReviews({
       owner,
