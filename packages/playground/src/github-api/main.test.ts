@@ -1,5 +1,6 @@
 import { Octokit } from 'octokit';
 import dotenv from 'dotenv';
+import dayjs from 'dayjs';
 
 dotenv.config();
 
@@ -24,7 +25,7 @@ describe('Octokitを使ってGitHub APIを操作する', () => {
     const res = await octokit.rest.pulls.get({
       owner,
       repo,
-      pull_number: 204,
+      pull_number: 294,
     });
 
     console.log(res.data);
@@ -39,5 +40,55 @@ describe('Octokitを使ってGitHub APIを操作する', () => {
     });
 
     console.log(reviews);
+  });
+
+  it('一週間以内にマージされたプルリクを取得する', async () => {
+    // https://docs.github.com/ja/rest/search#search-issues-and-pull-requests
+    const res = await octokit.rest.search.issuesAndPullRequests({
+      q: `repo:${owner}/${repo} is:pr is:merged merged:>=2023-04-15`,
+    });
+
+    console.log(JSON.stringify(res.data.items[0]));
+  });
+
+  it('マージしたプルリクを取得して、プルリク作成日とマージ日を出す。また、approveした人の名前と時間も出す。', async () => {
+    // https://docs.github.com/ja/rest/search#search-issues-and-pull-requests
+    const res = await octokit.rest.search.issuesAndPullRequests({
+      q: `repo:${owner}/${repo} is:pr is:merged merged:>=2023-04-25`,
+    });
+
+    const prs = res.data.items;
+
+    for (const pr of prs) {
+      const { data: prDetail } = await octokit.rest.pulls.get({
+        owner,
+        repo,
+        pull_number: pr.number,
+      });
+
+      const { data: reviews } = await octokit.rest.pulls.listReviews({
+        owner,
+        repo,
+        pull_number: pr.number,
+      });
+
+      const approvedReviews = reviews.filter((review) => review.state === 'APPROVED');
+
+      const output = {
+        prTitle: pr.title,
+        prUrl: pr.html_url,
+        prCreatedAt: dayjs(pr.created_at).add(9).format('YYYY/MM/DD HH:mm:ss'),
+        prMergedAt: dayjs(pr.pull_request?.merged_at).add(9).format('YYYY/MM/DD HH:mm:ss'),
+        changedFiles: prDetail.changed_files,
+        additions: prDetail.additions,
+        deletions: prDetail.deletions,
+        approvedReviews: approvedReviews.map((review) => ({
+          reviewer: review.user?.login,
+          approvedAt: dayjs(review.submitted_at).add(9).format('YYYY/MM/DD HH:mm:ss'),
+        })),
+      };
+
+      console.log(output);
+    }
   });
 });
