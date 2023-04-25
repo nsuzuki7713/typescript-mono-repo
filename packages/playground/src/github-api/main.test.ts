@@ -72,8 +72,6 @@ describe('Octokitを使ってGitHub APIを操作する', () => {
         pull_number: pr.number,
       });
 
-      const approvedReviews = reviews.filter((review) => review.state === 'APPROVED');
-
       const output = {
         prTitle: pr.title,
         prUrl: pr.html_url,
@@ -82,10 +80,12 @@ describe('Octokitを使ってGitHub APIを操作する', () => {
         changedFiles: prDetail.changed_files,
         additions: prDetail.additions,
         deletions: prDetail.deletions,
-        approvedReviews: approvedReviews.map((review) => ({
-          reviewer: review.user?.login,
-          approvedAt: dayjs(review.submitted_at).add(9).format('YYYY/MM/DD HH:mm:ss'),
-        })),
+        approvedReviews: reviews
+          .filter((review) => review.state === 'APPROVED')
+          .map((review) => ({
+            reviewer: review.user?.login,
+            approvedAt: dayjs(review.submitted_at).add(9).format('YYYY/MM/DD HH:mm:ss'),
+          })),
       };
 
       console.log(output);
