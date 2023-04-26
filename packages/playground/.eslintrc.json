@@ -88,6 +88,7 @@
       }
     ],
     "jest/no-disabled-tests": "off",
-    "jest/expect-expect": "off"
+    "jest/expect-expect": "off",
+    "jest/no-focused-tests": "off"
   }
 }
