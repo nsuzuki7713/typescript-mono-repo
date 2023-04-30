@@ -45,10 +45,11 @@ describe('Octokitを使ってGitHub APIを操作する', () => {
   it('一週間以内にマージされたプルリクを取得する', async () => {
     // https://docs.github.com/ja/rest/search#search-issues-and-pull-requests
     const res = await octokit.rest.search.issuesAndPullRequests({
-      q: `repo:${owner}/${repo} is:pr is:merged merged:>=2023-04-15`,
+      q: `repo:${owner}/${repo} is:pr is:merged merged:>=2023-01-15`,
+      page: 30,
     });
 
-    console.log(JSON.stringify(res.data.items[0]));
+    console.log(res);
   });
 
   it('マージしたプルリクを取得して、プルリク作成日とマージ日を出す。また、approveした人の名前と時間も出す。', async () => {
