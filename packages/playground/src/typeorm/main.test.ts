@@ -99,11 +99,67 @@ describe('typeormの動作確認', () => {
         const res = await repository.save(photo);
       });
 
-      it.only('既存の場合はupdateする', async () => {
+      it('既存の場合はupdateする', async () => {
         const photo = await repository.findOneBy({ name: 'Me and Bears' });
 
         photo!.views = 3;
         await repository.save(photo!);
+      });
+    });
+
+    describe('insert', () => {
+      it('存在しない場合はinsertする', async () => {
+        const photo = new Photo();
+        photo.name = 'Me and Bears';
+        photo.description = 'I am near polar bears';
+        photo.filename = 'photo-with-bears.jpg';
+        photo.views = 2;
+        photo.isPublished = true;
+
+        const res = await repository.insert(photo);
+      });
+
+      it('既に存在する場合はエラーになる', async () => {
+        const photo = await repository.findOneBy({ name: 'Me and Bears' });
+        photo!.views = 3;
+
+        await expect(repository.insert(photo!)).rejects.toThrow();
+      });
+    });
+
+    describe('update', () => {
+      it('存在する場合はupdateする', async () => {
+        const photo = await repository.findOneBy({ name: 'Me and Bears' });
+        photo!.views = 4;
+
+        const res = await repository.update(photo!.id!, { views: 10 });
+        console.log(res);
+      });
+
+      it('存在しない場合はエラーにはならない', async () => {
+        const photo = await repository.findOneBy({ name: 'Me and Bears' });
+        photo!.id = 9999;
+        photo!.views = 4;
+
+        const res = await repository.update(photo!.id!, { views: 11 });
+        console.log(res);
+      });
+    });
+
+    describe('upsert', () => {
+      it.only('存在する場合はupdateし、なければ作成する', async () => {
+        const photo = await repository.findOneBy({ name: 'Me and Bears' });
+        photo!.views = 901;
+
+        const photo2 = new Photo();
+        photo2.name = 'Me and Bears';
+        photo2.description = 'I am near polar bears';
+        photo2.filename = 'photo-with-bears.jpg';
+        photo2.views = 902;
+        photo2.isPublished = true;
+
+        const res = await repository.upsert([photo!, photo2], ['id']);
+        console.log(res);
       });
     });
   });
