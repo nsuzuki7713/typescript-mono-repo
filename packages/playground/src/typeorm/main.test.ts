@@ -163,4 +163,6 @@ describe('typeormの動作確認', () => {
       });
     });
   });
+
+  describe('QueryBuilder', () => {});
 });
