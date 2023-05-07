@@ -235,6 +235,101 @@ describe('typeormの動作確認', () => {
 
         console.log(res);
       });
+
+      it('orUpdateを使う場合、存在していない場合は追加され、あれば更新される', async () => {
+        const photo = await appDataSource.getRepository(Photo).findOneBy({ name: 'Me and Bears' });
+        photo!.views = 3;
+
+        // [
+        //   'INSERT INTO `photo`(`id`, `name`, `description`, `filename`, `views`, `isPublished`) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `views` = VALUES(`views`), `name` = VALUES(`name`)',
+        //   [
+        //     1,
+        //     'Me and Bears',
+        //     'I am near polar bears',
+        //     'photo-with-bears.jpg',
+        //     3,
+        //     1
+        //   ]
+        // ]
+        const res = await appDataSource
+          .createQueryBuilder()
+          .insert()
+          // 第一引数には更新対象のフィールド
+          // 第2引数はpostgreの場合に使用する。mysqlの場合は使用しない。
+          .orUpdate(['views', 'name'], ['id'])
+          .into(Photo)
+          .values(photo!)
+          .getQueryAndParameters();
+
+        console.log(res);
+      });
+
+      it.only('orUpdateを使う場合、存在していない場合は追加され、あれば更新される2', async () => {
+        // [
+        //   'INSERT INTO `photo`(`id`, `name`, `description`, `filename`, `views`, `isPublished`) VALUES (DEFAULT, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `views` = VALUES(`views`), `name` = VALUES(`name`)',
+        //   [
+        //     'Me and Bears',
+        //     'I am near polar bears',
+        //     'photo-with-bears.jpg',
+        //     3,
+        //     1
+        //   ]
+        // ]
+        const res = await appDataSource
+          .createQueryBuilder()
+          .insert()
+          // 第一引数には更新対象のフィールド、unique制約を持ったフィールドを指定する
+          .orUpdate(['views', 'name'])
+          .into(Photo)
+          .values({
+            name: 'Me and Bears',
+            description: 'I am near polar bears',
+            filename: 'photo-with-bears.jpg',
+            views: 3,
+            isPublished: true,
+          })
+          .getQueryAndParameters();
+
+        console.log(res);
+      });
+    });
+
+    describe('update', () => {
+      it('更新する', async () => {
+        // UPDATE `photo` SET `views` = ? WHERE `id` = ? -- PARAMETERS: [999,1]
+        const res = await appDataSource
+          .createQueryBuilder()
+          .update(Photo)
+          .set({ views: 999 })
+          .where('id = :id', { id: 1 })
+          .execute();
+
+        console.log(res);
+      });
+
+      it('更新対象が存在しなくてもエラーにならない', async () => {
+        const res = await appDataSource
+          .createQueryBuilder()
+          .update(Photo)
+          .set({ views: 999 })
+          .where('id = :id', { id: -1 })
+          .execute();
+
+        console.log(res);
+      });
+    });
+
+    describe('getQueryAndParameters', () => {
+      it('クエリを取得できる', async () => {
+        const res = appDataSource
+          .createQueryBuilder()
+          .update(Photo)
+          .set({ views: 999 })
+          .where('id = :id', { id: 1 })
+          .getQueryAndParameters();
+
+        console.log(res);
+      });
     });
   });
 });
