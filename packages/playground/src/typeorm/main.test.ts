@@ -147,7 +147,7 @@ describe('typeormの動作確認', () => {
     });
 
     describe('upsert', () => {
-      it.only('存在する場合はupdateし、なければ作成する', async () => {
+      it('存在する場合はupdateし、なければ作成する', async () => {
         const photo = await repository.findOneBy({ name: 'Me and Bears' });
         photo!.views = 901;
 
@@ -164,5 +164,77 @@ describe('typeormの動作確認', () => {
     });
   });
 
-  describe('QueryBuilder', () => {});
+  describe('QueryBuilder', () => {
+    it('取得する', async () => {
+      // SELECT `photo`.`id` AS `photo_id`, `photo`.`name` AS `photo_name`, `photo`.`description` AS `photo_description`, `photo`.`filename` AS `photo_filename`, `photo`.`views` AS `photo_views`, `photo`.`isPublished` AS `photo_isPublished` FROM `photo` `photo` WHERE `photo`.`id` = ? -- PARAMETERS: [1]
+      const photo = await appDataSource
+        .getRepository(Photo)
+        .createQueryBuilder('photo')
+        .where('photo.id = :id', { id: 1 })
+        .getOne();
+
+      console.log(photo);
+    });
+
+    it('取得する2', async () => {
+      // SELECT `photo`.`id` AS `photo_id`, `photo`.`name` AS `photo_name`, `photo`.`description` AS `photo_description`, `photo`.`filename` AS `photo_filename`, `photo`.`views` AS `photo_views`, `photo`.`isPublished` AS `photo_isPublished` FROM `photo` `photo` WHERE `photo`.`id` = ? -- PARAMETERS: [1]
+      const photo = await appDataSource
+        .createQueryBuilder()
+        .from('photo', 'photo')
+        .select('photo')
+        .where('photo.id = :id', { id: 1 })
+        .getOne();
+
+      console.log(photo);
+    });
+
+    it('取得する3', async () => {
+      // SELECT `photo`.`id` AS `photo_id`, `photo`.`description` AS `photo_description` FROM `photo` `photo` WHERE `photo`.`id` = ? -- PARAMETERS: [1]
+      const photo = await appDataSource
+        .createQueryBuilder()
+        .from('photo', 'photo')
+        .select('photo.id')
+        .addSelect('photo.description')
+        .where('photo.id = :id', { id: 1 })
+        .getOne();
+
+      console.log(photo);
+    });
+
+    it('leftJoinAndSelect', async () => {
+      // SELECT `photo`.`id` AS `photo_id`, `photo`.`name` AS `photo_name`, `photo`.`description` AS `photo_description`, `photo`.`filename` AS `photo_filename`, `photo`.`views` AS `photo_views`, `photo`.`isPublished` AS `photo_isPublished`, `photoMetadata`.`id` AS `photoMetadata_id`, `photoMetadata`.`height` AS `photoMetadata_height`, `photoMetadata`.`width` AS `photoMetadata_width`, `photoMetadata`.`orientation` AS `photoMetadata_orientation`, `photoMetadata`.`compressed` AS `photoMetadata_compressed`, `photoMetadata`.`comment` AS `photoMetadata_comment`, `photoMetadata`.`photoId` AS `photoMetadata_photoId` FROM `photo` `photo` LEFT JOIN `photo_metadata` `photoMetadata` ON `photo`.`id` = `photoMetadata`.`photoId`
+      const result = await appDataSource
+        .createQueryBuilder(Photo, 'photo')
+        .leftJoinAndSelect('photo_metadata', 'photoMetadata', 'photo.id = photoMetadata.photoId')
+        .getOne();
+
+      console.log(result);
+    });
+
+    describe('insert', () => {
+      it('insert', async () => {
+        const res = await appDataSource
+          .createQueryBuilder()
+          .insert()
+          .into(Photo)
+          // .updateEntity(false)
+          .values([
+            { name: 'Timber', description: 'Saw', filename: 'aaa.jpg', views: 1, isPublished: true },
+            { name: 'Phantom', description: 'Lancer', filename: 'bbb.jpg', views: 2, isPublished: true },
+          ])
+          .execute();
+
+        console.log(res);
+      });
+
+      it('既に存在している場合はエラーになる', async () => {
+        const photo = await appDataSource.getRepository(Photo).findOneBy({ name: 'Me and Bears' });
+        photo!.views = 3;
+
+        const res = await appDataSource.createQueryBuilder().insert().into(Photo).values(photo!).execute();
+
+        console.log(res);
+      });
+    });
+  });
 });
