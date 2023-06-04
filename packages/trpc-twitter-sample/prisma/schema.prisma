@@ -55,6 +55,10 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    tweets        Tweet[]
+    tweetLikes    TweetLike[]
+    following     UserFollow[] @relation("UserFollowsUser")
+    followers     UserFollow[] @relation("UserFollowsTarget")
 }
 
 model VerificationToken {
@@ -63,4 +67,34 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model Tweet {
+    id        String      @id @default(uuid())
+    from      User        @relation(fields: [userId], references: [id])
+    userId    String
+    content   String
+    likes     TweetLike[]
+    createdAt DateTime    @default(now())
+    updatedAt DateTime    @default(now()) @updatedAt
+}
+
+model TweetLike {
+    id        String   @id @default(uuid())
+    tweet     Tweet    @relation(fields: [tweetId], references: [id])
+    user      User     @relation(fields: [userId], references: [id])
+    tweetId   String
+    userId    String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+}
+
+model UserFollow {
+    id        String   @id @default(uuid())
+    user      User     @relation("UserFollowsUser", fields: [userId], references: [id])
+    userId    String
+    target    User     @relation("UserFollowsTarget", fields: [targetId], references: [id])
+    targetId  String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
 }
