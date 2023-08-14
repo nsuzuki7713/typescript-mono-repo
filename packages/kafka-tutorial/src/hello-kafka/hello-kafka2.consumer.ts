@@ -3,7 +3,7 @@ import { KafkaMessage } from 'kafkajs';
 import { KafkaConsumer } from 'src/kafka.consumer';
 
 @Injectable()
-export class HelloConsumer extends KafkaConsumer {
+export class Hello2Consumer extends KafkaConsumer {
   readonly consumerGroupName: string;
   readonly consumerTopicName: string;
 
@@ -14,7 +14,7 @@ export class HelloConsumer extends KafkaConsumer {
   }
 
   handler(message: KafkaMessage): void {
-    this.logger.log('hello-kafka1');
+    this.logger.log('hello-kafka2');
     this.logger.log(`受信したメッセージ: ${message.value.toString()}`);
   }
 }

@@ -84,7 +84,7 @@ export abstract class KafkaConsumer implements OnModuleInit, OnModuleDestroy {
 
     await this.consumer.connect();
     await this.consumer.subscribe({
-      topics: [this.consumerTopicName],
+      topics: [this.consumerTopicName, 'test2'],
       fromBeginning: true,
     });
     await this.consumer.run({
