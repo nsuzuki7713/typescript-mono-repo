@@ -1,0 +1,140 @@
+# GitHub PR Analyzer 結果分析プロンプト
+
+以下は、GitHub PR Analyzerツールで生成されたエンジニア活動データです。これらのデータを基に、エンジニアとしての貢献と活動を分析してください。
+
+## 分析対象データファイル
+
+### 1. プルリクエスト詳細データ (`created_prs_details_[ユーザー名]_[期間].json`)
+ユーザーが作成したプルリクエストの詳細情報（配列形式）
+
+**データ内容：**
+- `pr_number`: プルリクエスト番号
+- `title`: プルリクエストタイトル  
+- `body`: プルリクエスト本文・説明
+- `url`: プルリクエストURL
+- `repository`: リポジトリ情報（owner/repo形式）
+- `author`: 作成者情報
+- `state`: 状態（"MERGED", "CLOSED", "OPEN"）
+- `created_at`: 作成日時（ISO 8601形式）
+- `updated_at`: 最終更新日時
+- `merged_at`: マージ日時（null可）
+- `closed_at`: クローズ日時（null可）
+- `additions`: 追加行数
+- `deletions`: 削除行数
+- `changed_files`: 変更ファイル数
+- `labels`: 付与されたラベル一覧
+- `milestone`: マイルストーン情報（null可）
+- `assignees`: アサインされたユーザー一覧
+- `comments_on_pr_total_count`: プルリクエスト本体のコメント数
+- `reviews_submitted_total_count`: 提出されたレビュー数
+- `review_threads_total_count`: レビュースレッド数
+- `time_to_merge_hours`: マージまでの時間（時間単位、null可）
+
+### 2. レビューサマリー (`my_review_summary_[ユーザー名]_[期間].json`)
+ユーザーが行ったレビュー活動の統計情報
+
+**データ内容：**
+- `user`: 対象ユーザー名
+- `period_start`: 分析期間開始日
+- `period_end`: 分析期間終了日
+- `reviewed_pr_count`: レビューしたプルリクエスト数（重複除去）
+- `submitted_review_action_count`: 提出したレビューアクション総数（承認、変更要求、コメント等）
+- `total_review_comments_given`: レビューで投稿したコメント総数
+
+### 3. 全体サマリー (`overall_summary_[ユーザー名]_[期間].json`)
+ユーザーのプルリクエスト作成活動の統計情報
+
+**データ内容：**
+- `user`: 対象ユーザー名
+- `period_start`: 分析期間開始日
+- `period_end`: 分析期間終了日
+- `total_created_prs`: 作成したプルリクエスト総数
+- `total_merged_prs`: マージされたプルリクエスト総数
+- `total_additions_in_created_prs`: 追加行数合計
+- `total_deletions_in_created_prs`: 削除行数合計
+- `total_pr_body_comments_received`: 受け取ったプルリクエストコメント総数
+- `total_review_comments_received_on_created_prs`: 受け取ったレビューコメント総数
+
+### 4. リポジトリサマリー (`repository_summary_[ユーザー名]_[期間].json`)
+関係したリポジトリごとの活動統計（個人の貢献 + リポジトリ全体の統計）
+
+**データ内容：**
+- `user`: 対象ユーザー名
+- `period_start`: 分析期間開始日
+- `period_end`: 分析期間終了日
+- `repositories`: リポジトリ別活動統計の配列
+  - `repository_name`: リポジトリ名（owner/repo形式）
+  - `created_prs_count`: 自分が作成したプルリクエスト数
+  - `merged_prs_count`: 自分のマージ済みプルリクエスト数
+  - `total_additions`: 自分の追加行数
+  - `total_deletions`: 自分の削除行数
+  - `total_comments_received`: 自分が受け取ったコメント数
+  - `total_review_comments_received`: 自分が受け取ったレビューコメント数
+  - `reviewed_prs_count`: 自分がレビューしたプルリクエスト数
+  - `review_actions_count`: 自分のレビューアクション数
+  - `review_comments_given`: 自分が投稿したレビューコメント数
+  - `first_pr_created_at`: 自分の最初のプルリクエスト作成日
+  - `last_pr_created_at`: 自分の最新のプルリクエスト作成日
+  - `repository_overall_stats`: リポジトリ全体統計
+    - `total_prs_in_period`: リポジトリの全プルリクエスト数（期間内）
+    - `total_merged_prs_in_period`: リポジトリの全マージ済みプルリクエスト数
+    - `total_open_prs_in_period`: リポジトリの全オープンプルリクエスト数
+    - `total_closed_prs_in_period`: リポジトリの全クローズ済みプルリクエスト数
+    - `user_contribution_rate`: 自分の貢献率（作成PR数 / 全PR数の％）
+    - `first_pr_in_period`: リポジトリの最初のプルリクエスト作成日
+    - `last_pr_in_period`: リポジトリの最新のプルリクエスト作成日
+
+## 分析観点
+
+以下の観点でエンジニアとしての活動と貢献を分析してください：
+
+### 1. コード貢献の量と質
+- プルリクエストの作成頻度と規模（コード行数、ファイル数）
+- マージ率とプルリクエストの品質
+- コードの変更パターン（機能追加、バグ修正、リファクタリング等）
+- プルリクエストのタイトルや説明文から読み取れる作業内容
+
+### 2. レビュー活動とチームへの貢献
+- 他のメンバーのプルリクエストに対するレビュー活動
+- レビューコメントの質と量
+- チームの開発プロセスへの参加度
+
+### 3. リポジトリレベルでの貢献度
+- 各リポジトリにおける貢献率
+- リポジトリ全体の活動に対する相対的な貢献度
+- 複数プロジェクトへの関与状況
+
+### 4. 開発サイクルと効率性
+- プルリクエストのマージまでの時間
+- レビューを受ける頻度とフィードバックの活用
+- 継続的な開発活動のパターン
+
+### 5. 技術的成長と学習
+- 扱っているプロジェクトの技術領域
+- プルリクエストの内容から見る技術的な進歩
+- 新機能開発と既存システムの改善のバランス
+
+### 6. コミュニケーションとコラボレーション
+- プルリクエストでのディスカッション参加度
+- 受け取ったフィードバックと対応
+- チームメンバーとの協働状況
+
+## 分析結果で期待する内容
+
+1. **定量的な活動サマリー**
+   - 期間中の主要な数値指標
+   - 他の一般的なエンジニアとの比較（可能であれば）
+
+2. **貢献の特徴と強み**
+   - データから読み取れる特徴的な活動パターン
+   - エンジニアとしての強みや専門性
+
+3. **改善提案**
+   - より効果的な貢献のための提案
+   - 成長につながる活動のアドバイス
+
+4. **成果とインパクト**
+   - チームやプロジェクトに与えたインパクト
+   - 技術的貢献の価値
+
+データをもとに、自己評価や人事評価に活用できる客観的で建設的な分析をお願いします。
