@@ -3,8 +3,10 @@
 import { Command } from "commander";
 import dotenv from "dotenv";
 import { AnalyzerController } from "./services/analyzerController";
-import { ConfigManager, AppConfig } from "./config/config";
+import { ConfigManager, AppConfig, TeamConfigManager } from "./config/config";
 import { Logger } from "./utils/logger";
+import { TeamAnalysisService } from "./services/teamAnalysisService";
+import { TeamConfig } from "./types/github";
 
 // Load environment variables
 dotenv.config();
@@ -18,6 +20,19 @@ function loadAndValidateConfig(): AppConfig {
     return configManager.getConfig();
   } catch (error) {
     Logger.error(`Configuration error: ${error}`);
+    process.exit(1);
+  }
+}
+
+/**
+ * チーム設定を読み込んで検証
+ */
+function loadAndValidateTeamConfig(): TeamConfig {
+  try {
+    const configManager = TeamConfigManager.getInstance();
+    return configManager.getTeamConfig();
+  } catch (error) {
+    Logger.error(`Team configuration error: ${error}`);
     process.exit(1);
   }
 }
@@ -135,6 +150,53 @@ async function main() {
         );
       } catch (error) {
         Logger.error(`Configuration error: ${error}`);
+        process.exit(1);
+      }
+    });
+
+  // チーム分析コマンド
+  program
+    .command("team-analyze")
+    .description("Run team analysis for multiple team members")
+    .action(async () => {
+      try {
+        const teamConfig = loadAndValidateTeamConfig();
+        const teamAnalysisService = new TeamAnalysisService(
+          teamConfig.github_token
+        );
+        const result = await teamAnalysisService.analyzeTeam(teamConfig);
+
+        Logger.info("=== Team Analysis Completed ===");
+        Logger.info(`Team summary: ${result.teamSummaryFile}`);
+        Logger.info(
+          `Member details: ${result.memberDetailsFiles.length} files generated`
+        );
+      } catch (error) {
+        Logger.error(`Team analysis failed: ${error}`);
+        process.exit(1);
+      }
+    });
+
+  // チーム設定確認コマンド
+  program
+    .command("team-config")
+    .description("Display current team configuration")
+    .action(async () => {
+      try {
+        const teamConfig = loadAndValidateTeamConfig();
+        console.log("Current team configuration:");
+        console.log(
+          JSON.stringify(
+            {
+              ...teamConfig,
+              github_token: teamConfig.github_token ? "[HIDDEN]" : "[NOT SET]",
+            },
+            null,
+            2
+          )
+        );
+      } catch (error) {
+        Logger.error(`Team configuration error: ${error}`);
         process.exit(1);
       }
     });

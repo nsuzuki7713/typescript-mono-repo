@@ -198,6 +198,100 @@ export interface RepositoryOverallStats {
   last_pr_in_period: string | null;
 }
 
+/**
+ * チーム分析サマリー情報（出力ファイル: team_summary_[期間].json）
+ * チーム全体の活動統計とメンバー比較
+ */
+export interface TeamSummary {
+  /** チーム名（オプション） */
+  team_name?: string;
+  /** 分析期間開始日（YYYY-MM-DD形式） */
+  period_start: string;
+  /** 分析期間終了日（YYYY-MM-DD形式） */
+  period_end: string;
+  /** 分析対象メンバー一覧 */
+  team_members: string[];
+  /** チーム全体統計 */
+  team_stats: {
+    /** チーム全体の作成PR数 */
+    total_team_prs: number;
+    /** チーム全体のマージPR数 */
+    total_team_merged_prs: number;
+    /** チーム全体の追加行数 */
+    total_team_additions: number;
+    /** チーム全体の削除行数 */
+    total_team_deletions: number;
+    /** チーム全体のレビュー数 */
+    total_team_reviews: number;
+  };
+  /** メンバー別活動統計 */
+  members_stats: TeamMemberStats[];
+  /** リポジトリ別チーム活動 */
+  repositories: TeamRepositoryActivity[];
+}
+
+/**
+ * チームメンバー別統計情報
+ */
+export interface TeamMemberStats {
+  /** メンバー名 */
+  member: string;
+  /** 作成PR数 */
+  created_prs: number;
+  /** マージPR数 */
+  merged_prs: number;
+  /** 追加行数 */
+  additions: number;
+  /** 削除行数 */
+  deletions: number;
+  /** レビューしたPR数 */
+  reviewed_prs: number;
+  /** レビューアクション数 */
+  review_actions: number;
+  /** チーム内での貢献率（PR作成数ベース） */
+  contribution_rate: number;
+  /** 最も活発なリポジトリ */
+  most_active_repo: string;
+}
+
+/**
+ * チームのリポジトリ別活動統計
+ */
+export interface TeamRepositoryActivity {
+  /** リポジトリ名 */
+  repository_name: string;
+  /** リポジトリでのチーム全体PR数 */
+  team_prs_count: number;
+  /** リポジトリでのチーム全体マージPR数 */
+  team_merged_prs_count: number;
+  /** メンバー別貢献度 */
+  members_contribution: {
+    member: string;
+    prs_count: number;
+    contribution_percentage: number;
+  }[];
+}
+
+/**
+ * チーム分析用設定
+ */
+export interface TeamConfig {
+  /** チーム名（オプション） */
+  team_name?: string;
+  /** チームメンバーのGitHubユーザー名一覧 */
+  team_members: string[];
+  /** GitHub Token */
+  github_token: string;
+  /** 分析期間開始日 */
+  period_start_date: string;
+  /** 分析期間終了日 */
+  period_end_date: string;
+  /** 分析対象リポジトリ（オプション） */
+  repositories?: string[];
+  /** 出力ディレクトリ */
+  output_dir: string;
+}
+
 // GraphQL response types
 export interface GraphQLPullRequest {
   number: number;

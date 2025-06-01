@@ -50,6 +50,8 @@ export class FileManager {
     endDate: string,
     extension: string = "json"
   ): string {
-    return `${prefix}_${username}_${startDate}-${endDate}.${extension}`;
+    // ファイル名に使えない文字をアンダースコアに置換
+    const safeUsername = username.replace(/[\/\\:*?"<>|]/g, "_");
+    return `${prefix}_${safeUsername}_${startDate}-${endDate}.${extension}`;
   }
 }
