@@ -94,7 +94,7 @@ export class RepositoryService {
     // 各リポジトリの全体統計を取得
     for (const [repoName, activity] of repositoryMap) {
       Logger.info(`Fetching overall stats for repository: ${repoName}`);
-      
+
       try {
         const repoStats = await this.githubClient.getRepositoryPullRequestStats(
           repoName,
@@ -107,9 +107,12 @@ export class RepositoryService {
           total_merged_prs_in_period: repoStats.merged,
           total_open_prs_in_period: repoStats.open,
           total_closed_prs_in_period: repoStats.closed,
-          user_contribution_rate: repoStats.total > 0 
-            ? Math.round((activity.created_prs_count / repoStats.total) * 100 * 100) / 100 
-            : 0,
+          user_contribution_rate:
+            repoStats.total > 0
+              ? Math.round(
+                  (activity.created_prs_count / repoStats.total) * 100 * 100
+                ) / 100
+              : 0,
           first_pr_in_period: repoStats.firstPrDate,
           last_pr_in_period: repoStats.lastPrDate,
         };
