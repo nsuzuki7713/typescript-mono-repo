@@ -1,65 +1,133 @@
+/**
+ * GitHubユーザー情報
+ */
 export interface GitHubUser {
+  /** GitHubユーザー名 */
   login: string;
 }
 
+/**
+ * GitHubリポジトリ情報
+ */
 export interface GitHubRepository {
+  /** "owner/repository" 形式のフルネーム */
   nameWithOwner: string;
+  /** リポジトリオーナー情報 */
   owner: GitHubUser;
+  /** リポジトリ名 */
   name: string;
 }
 
+/**
+ * GitHubラベル情報
+ */
 export interface GitHubLabel {
+  /** ラベル名 */
   name: string;
+  /** ラベルの色（16進数） */
   color: string;
 }
 
+/**
+ * GitHubマイルストーン情報
+ */
 export interface GitHubMilestone {
+  /** マイルストーンタイトル */
   title: string;
+  /** 期限日（ISO 8601形式、null可） */
   due_on: string | null;
 }
 
+/**
+ * プルリクエスト詳細情報（出力ファイル: created_prs_details_*.json）
+ * ユーザーが作成したプルリクエストの詳細データ
+ */
 export interface GitHubPullRequest {
+  /** プルリクエスト番号 */
   pr_number: number;
+  /** プルリクエストタイトル */
   title: string;
+  /** プルリクエスト本文 */
   body: string;
+  /** プルリクエストURL */
   url: string;
+  /** 対象リポジトリ情報 */
   repository: GitHubRepository;
+  /** 作成者情報 */
   author: GitHubUser;
+  /** プルリクエストの状態 */
   state: "MERGED" | "CLOSED" | "OPEN";
+  /** 作成日時（ISO 8601形式） */
   created_at: string;
+  /** 最終更新日時（ISO 8601形式） */
   updated_at: string;
+  /** マージ日時（ISO 8601形式、null可） */
   merged_at: string | null;
+  /** クローズ日時（ISO 8601形式、null可） */
   closed_at: string | null;
+  /** 追加行数 */
   additions: number;
+  /** 削除行数 */
   deletions: number;
+  /** 変更ファイル数 */
   changed_files: number;
+  /** 付与されたラベル一覧 */
   labels: GitHubLabel[];
+  /** 関連マイルストーン */
   milestone: GitHubMilestone | null;
+  /** アサインされたユーザー一覧 */
   assignees: GitHubUser[];
+  /** プルリクエストに投稿されたコメント総数 */
   comments_on_pr_total_count: number;
+  /** 提出されたレビュー総数 */
   reviews_submitted_total_count: number;
+  /** レビュースレッド総数 */
   review_threads_total_count: number;
+  /** マージまでの所要時間（時間単位、null可） */
   time_to_merge_hours: number | null;
 }
 
+/**
+ * レビューサマリー情報（出力ファイル: my_review_summary_*.json）
+ * ユーザーが行ったレビュー活動の統計情報
+ */
 export interface ReviewSummary {
+  /** 対象ユーザー名 */
   user: string;
+  /** 分析期間開始日（YYYY-MM-DD形式） */
   period_start: string;
+  /** 分析期間終了日（YYYY-MM-DD形式） */
   period_end: string;
+  /** レビューしたプルリクエスト数（重複除去） */
   reviewed_pr_count: number;
+  /** 提出したレビューアクション総数（承認、変更要求、コメント等） */
   submitted_review_action_count: number;
+  /** レビューで投稿したコメント総数 */
   total_review_comments_given: number;
 }
 
+/**
+ * 全体サマリー情報（出力ファイル: overall_summary_*.json）
+ * ユーザーのプルリクエスト作成活動の統計情報
+ */
 export interface OverallSummary {
+  /** 対象ユーザー名 */
   user: string;
+  /** 分析期間開始日（YYYY-MM-DD形式） */
   period_start: string;
+  /** 分析期間終了日（YYYY-MM-DD形式） */
   period_end: string;
+  /** 作成したプルリクエスト総数 */
   total_created_prs: number;
+  /** マージされたプルリクエスト総数 */
   total_merged_prs: number;
+  /** 作成したプルリクエストでの追加行数合計 */
   total_additions_in_created_prs: number;
+  /** 作成したプルリクエストでの削除行数合計 */
   total_deletions_in_created_prs: number;
+  /** 作成したプルリクエストで受け取ったコメント総数 */
   total_pr_body_comments_received: number;
+  /** 作成したプルリクエストで受け取ったレビューコメント総数 */
   total_review_comments_received_on_created_prs: number;
 }
 
@@ -126,27 +194,33 @@ export interface GraphQLSearchResponse {
 }
 
 export interface GraphQLReviewResponse {
-  user: {
-    pullRequestReviews: {
-      nodes: Array<{
-        pullRequest: {
-          number: number;
-          repository: {
-            nameWithOwner: string;
-          };
-          createdAt: string;
-          mergedAt: string | null;
+  search: {
+    edges: Array<{
+      node: {
+        number: number;
+        title: string;
+        repository: {
+          nameWithOwner: string;
         };
-        state: string;
-        submittedAt: string;
-        comments: {
-          totalCount: number;
+        createdAt: string;
+        mergedAt: string | null;
+        reviews: {
+          nodes: Array<{
+            author: {
+              login: string;
+            };
+            state: string;
+            submittedAt: string;
+            comments: {
+              totalCount: number;
+            };
+          }>;
         };
-      }>;
-      pageInfo: {
-        hasNextPage: boolean;
-        endCursor: string | null;
       };
+    }>;
+    pageInfo: {
+      hasNextPage: boolean;
+      endCursor: string | null;
     };
   };
 }

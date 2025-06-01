@@ -94,33 +94,83 @@ npm run dev config
 
 ## 出力ファイル
 
+すべてのファイルは `./output/` ディレクトリに生成されます。
+
 ### 1. プルリクエスト詳細 (`created_prs_details_[ユーザー名]_[期間].json`)
 
-各 PR について以下の情報を含みます：
+ユーザーが作成したプルリクエストの詳細情報（配列形式）：
 
-- PR 番号、タイトル、本文、URL
-- リポジトリ情報
-- 作成者、状態、日時情報
-- コード変更統計（追加行数、削除行数、変更ファイル数）
-- ラベル、マイルストーン、担当者
-- コメント・レビュー統計
-- マージまでの所要時間
+```json
+[
+  {
+    "pr_number": 127,                          // PR番号
+    "title": "feat: 新しい機能を追加",           // PRタイトル
+    "body": "詳細な説明...",                    // PR本文
+    "url": "https://github.com/owner/repo/pull/127", // PR URL
+    "repository": {                            // リポジトリ情報
+      "nameWithOwner": "owner/repo",
+      "owner": { "login": "owner" },
+      "name": "repo"
+    },
+    "author": { "login": "username" },         // 作成者
+    "state": "MERGED",                         // 状態: "OPEN" | "MERGED" | "CLOSED"
+    "created_at": "2025-05-31T08:47:08Z",     // 作成日時（ISO 8601）
+    "updated_at": "2025-05-31T16:29:52Z",     // 更新日時（ISO 8601）
+    "merged_at": "2025-05-31T16:30:00Z",      // マージ日時（null可）
+    "closed_at": "2025-05-31T16:30:00Z",      // クローズ日時（null可）
+    "additions": 156,                          // 追加行数
+    "deletions": 7,                           // 削除行数
+    "changed_files": 3,                       // 変更ファイル数
+    "labels": [                               // ラベル一覧
+      { "name": "enhancement", "color": "a2eeef" }
+    ],
+    "milestone": {                            // マイルストーン（null可）
+      "title": "v1.0.0",
+      "due_on": "2025-06-30T00:00:00Z"
+    },
+    "assignees": [                            // アサイン者一覧
+      { "login": "username" }
+    ],
+    "comments_on_pr_total_count": 5,          // PR本体のコメント数
+    "reviews_submitted_total_count": 2,       // 提出されたレビュー数
+    "review_threads_total_count": 3,          // レビュースレッド数
+    "time_to_merge_hours": 7.75              // マージまでの時間（null可）
+  }
+]
+```
 
 ### 2. レビューサマリー (`my_review_summary_[ユーザー名]_[期間].json`)
 
-レビュー活動に関する以下の統計情報：
+ユーザーが行ったレビュー活動の統計情報：
 
-- レビューしたユニーク PR 数
-- 提出したレビューアクション総数
-- 送信したレビューコメント総数
+```json
+{
+  "user": "username",                        // 対象ユーザー名
+  "period_start": "2025-01-01",             // 分析期間開始日
+  "period_end": "2025-06-01",               // 分析期間終了日
+  "reviewed_pr_count": 50,                  // レビューしたPR数（重複除去）
+  "submitted_review_action_count": 91,      // レビューアクション総数（承認、変更要求、コメント等）
+  "total_review_comments_given": 79         // レビューコメント総数
+}
+```
 
 ### 3. 全体サマリー (`overall_summary_[ユーザー名]_[期間].json`)
 
-作成した PR に関する以下の統計情報：
+ユーザーのプルリクエスト作成活動の統計情報：
 
-- 総 PR 作成数・マージ数
-- 総追加・削除行数
-- 受け取ったコメント・レビュー総数
+```json
+{
+  "user": "username",                               // 対象ユーザー名
+  "period_start": "2025-01-01",                    // 分析期間開始日
+  "period_end": "2025-06-01",                      // 分析期間終了日
+  "total_created_prs": 30,                         // 作成したPR総数
+  "total_merged_prs": 28,                          // マージされたPR総数
+  "total_additions_in_created_prs": 1234,          // 追加行数合計
+  "total_deletions_in_created_prs": 567,           // 削除行数合計
+  "total_pr_body_comments_received": 45,           // 受け取ったPRコメント総数
+  "total_review_comments_received_on_created_prs": 123 // 受け取ったレビューコメント総数
+}
+```
 
 ## プロジェクト構成
 

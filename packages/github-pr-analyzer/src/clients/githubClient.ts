@@ -15,13 +15,13 @@ export class GitHubClient {
   }
 
   async searchPullRequests(
-    query: string,
+    searchQuery: string,
     first: number = 100,
     after?: string
   ): Promise<GraphQLSearchResponse> {
     try {
       const response = await this.graphqlWithAuth(SEARCH_PULL_REQUESTS_QUERY, {
-        query,
+        searchQuery,
         first,
         after,
       });
@@ -34,12 +34,19 @@ export class GitHubClient {
 
   async getUserReviews(
     login: string,
+    startDate: string,
+    endDate: string,
     first: number = 100,
     after?: string
   ): Promise<GraphQLReviewResponse> {
     try {
-      const response = await this.graphqlWithAuth(GET_USER_REVIEWS_QUERY, {
+      const reviewQuery = this.buildReviewSearchQuery(
         login,
+        startDate,
+        endDate
+      );
+      const response = await this.graphqlWithAuth(GET_USER_REVIEWS_QUERY, {
+        reviewQuery,
         first,
         after,
       });
@@ -60,6 +67,25 @@ export class GitHubClient {
     repositories?: string[]
   ): string {
     let query = `author:${author} is:pr created:${startDate}..${endDate}`;
+
+    if (repositories && repositories.length > 0) {
+      const repoQuery = repositories.map((repo) => `repo:${repo}`).join(" ");
+      query = `${query} (${repoQuery})`;
+    }
+
+    return query;
+  }
+
+  /**
+   * Build search query string for reviewed pull requests
+   */
+  buildReviewSearchQuery(
+    reviewer: string,
+    startDate: string,
+    endDate: string,
+    repositories?: string[]
+  ): string {
+    let query = `type:pr reviewed-by:${reviewer} created:${startDate}..${endDate}`;
 
     if (repositories && repositories.length > 0) {
       const repoQuery = repositories.map((repo) => `repo:${repo}`).join(" ");

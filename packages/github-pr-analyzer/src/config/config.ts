@@ -29,7 +29,7 @@ export class ConfigManager {
 
   private loadConfig(): AppConfig {
     const githubToken = process.env.GITHUB_TOKEN;
-    const userLogin = process.env.USER_LOGIN;
+    const userLogin = process.env.GITHUB_USER_LOGIN;
     const periodStartDate = process.env.PERIOD_START_DATE;
     const periodEndDate = process.env.PERIOD_END_DATE;
     const outputDir = process.env.OUTPUT_DIR || "./output";

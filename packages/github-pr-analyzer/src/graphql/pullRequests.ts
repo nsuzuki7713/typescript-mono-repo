@@ -1,6 +1,6 @@
 export const SEARCH_PULL_REQUESTS_QUERY = `
-  query SearchPullRequests($query: String!, $first: Int!, $after: String) {
-    search(query: $query, type: ISSUE, first: $first, after: $after) {
+  query SearchPullRequests($searchQuery: String!, $first: Int!, $after: String) {
+    search(query: $searchQuery, type: ISSUE, first: $first, after: $after) {
       edges {
         node {
           ... on PullRequest {

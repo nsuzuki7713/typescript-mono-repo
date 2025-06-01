@@ -31,44 +31,53 @@ export class ReviewService {
       await this.rateLimiter.wait();
 
       try {
-        const response = await this.client.getUserReviews(
+        const response: any = await this.client.getUserReviews(
           username,
+          startDate,
+          endDate,
           100,
           cursor || undefined
         );
 
-        if (!response.user || !response.user.pullRequestReviews) {
+        if (!response.search || !response.search.edges) {
           Logger.warn(`No review data found for user: ${username}`);
           break;
         }
 
-        const reviews = response.user.pullRequestReviews.nodes.filter(
-          (review) => {
-            // Filter reviews within the date range using submittedAt
-            if (!review.submittedAt) return false;
-            return DateUtils.isDateInRange(
-              review.submittedAt,
-              startDate,
-              endDate
+        let reviewsInPeriod = 0;
+        let commentsInPeriod = 0;
+
+        // Process pull requests and extract reviews by the specific user
+        for (const edge of response.search.edges) {
+          const pr = edge.node;
+          if (pr.reviews && pr.reviews.nodes) {
+            const userReviews = pr.reviews.nodes.filter(
+              (review: any) =>
+                review.author &&
+                review.author.login === username &&
+                review.submittedAt &&
+                DateUtils.isDateInRange(review.submittedAt, startDate, endDate)
             );
+
+            if (userReviews.length > 0) {
+              reviewedPrNumbers.push(pr.number);
+              reviewsInPeriod += userReviews.length;
+              commentsInPeriod += userReviews.reduce(
+                (sum: number, review: any) => sum + review.comments.totalCount,
+                0
+              );
+            }
           }
-        );
+        }
 
-        const prNumbers = reviews.map((review) => review.pullRequest.number);
-        reviewedPrNumbers.push(...prNumbers);
+        totalReviewActions += reviewsInPeriod;
+        totalReviewComments += commentsInPeriod;
 
-        totalReviewActions += reviews.length;
-
-        totalReviewComments += reviews.reduce(
-          (sum, review) => sum + review.comments.totalCount,
-          0
-        );
-
-        hasNextPage = response.user.pullRequestReviews.pageInfo.hasNextPage;
-        cursor = response.user.pullRequestReviews.pageInfo.endCursor;
+        hasNextPage = response.search.pageInfo.hasNextPage;
+        cursor = response.search.pageInfo.endCursor;
 
         Logger.info(
-          `Processed ${reviews.length} reviews (Total actions: ${totalReviewActions})`
+          `Processed ${reviewsInPeriod} reviews (Total actions: ${totalReviewActions})`
         );
       } catch (error) {
         Logger.error("Error fetching user reviews:", error);
