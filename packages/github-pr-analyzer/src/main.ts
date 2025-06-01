@@ -6,6 +6,7 @@ import { AnalyzerController } from "./services/analyzerController";
 import { ConfigManager, AppConfig, TeamConfigManager } from "./config/config";
 import { Logger } from "./utils/logger";
 import { TeamAnalysisService } from "./services/teamAnalysisService";
+import { PromptGeneratorService } from "./services/promptGeneratorService";
 import { TeamConfig } from "./types/github";
 
 // Load environment variables
@@ -197,6 +198,74 @@ async function main() {
         );
       } catch (error) {
         Logger.error(`Team configuration error: ${error}`);
+        process.exit(1);
+      }
+    });
+
+  // 個人分析プロンプト生成コマンド
+  program
+    .command("generate-prompt")
+    .description(
+      "Generate analysis prompt with actual data for individual analysis"
+    )
+    .action(async () => {
+      try {
+        const config = loadAndValidateConfig();
+        const promptFile =
+          await PromptGeneratorService.generateIndividualAnalysisPrompt(
+            config.userLogin,
+            config.periodStartDate,
+            config.periodEndDate,
+            config.outputDir
+          );
+
+        Logger.info("=== Individual Analysis Prompt Generated ===");
+        Logger.info(`Prompt file: ${promptFile}`);
+        Logger.info(
+          "You can copy and paste this prompt to AI tools for analysis."
+        );
+      } catch (error) {
+        Logger.error(`Prompt generation failed: ${error}`);
+        process.exit(1);
+      }
+    });
+
+  // チーム分析プロンプト生成コマンド
+  program
+    .command("generate-team-prompt")
+    .description("Generate analysis prompt with actual data for team analysis")
+    .action(async () => {
+      try {
+        Logger.info("Starting team prompt generation...");
+        const teamConfig = loadAndValidateTeamConfig();
+        Logger.info(
+          `Team config loaded: ${JSON.stringify(teamConfig, null, 2)}`
+        );
+
+        const teamName = teamConfig.team_name || "team";
+        Logger.info(`Using team name: ${teamName}`);
+
+        const promptFile =
+          await PromptGeneratorService.generateTeamAnalysisPrompt(
+            teamName,
+            teamConfig.period_start_date,
+            teamConfig.period_end_date,
+            teamConfig.output_dir
+          );
+
+        Logger.info("=== Team Analysis Prompt Generated ===");
+        Logger.info(`Prompt file: ${promptFile}`);
+        Logger.info(
+          "You can copy and paste this prompt to AI tools for analysis."
+        );
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        const errorStack = error instanceof Error ? error.stack : undefined;
+        Logger.error(`Team prompt generation failed: ${errorMessage}`);
+        if (errorStack) {
+          Logger.error(`Error stack: ${errorStack}`);
+        }
         process.exit(1);
       }
     });
