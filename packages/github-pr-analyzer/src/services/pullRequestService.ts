@@ -30,7 +30,7 @@ export class PullRequestService {
       endDate,
       repositories
     );
-    Logger.debug(`Search query: ${query}`);
+    Logger.info(`Search query: ${query}`);
 
     const allPullRequests: GitHubPullRequest[] = [];
     let hasNextPage = true;

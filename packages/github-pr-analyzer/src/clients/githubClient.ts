@@ -70,7 +70,7 @@ export class GitHubClient {
 
     if (repositories && repositories.length > 0) {
       const repoQuery = repositories.map((repo) => `repo:${repo}`).join(" ");
-      query = `${query} (${repoQuery})`;
+      query = `${query} ${repoQuery}`;
     }
 
     return query;
