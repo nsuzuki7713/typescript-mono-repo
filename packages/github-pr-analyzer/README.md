@@ -7,6 +7,7 @@
 1. **プルリクエスト詳細情報の収集**: 指定期間内に作成した PR の詳細情報を JSON ファイルに出力
 2. **レビュー活動サマリーの集計**: 指定期間内のレビュー活動に関するサマリー情報を JSON ファイルに出力
 3. **全体サマリーの生成**: プルリクエストデータから活動全体のサマリー情報を集計
+4. **リポジトリサマリーの生成**: 関係したリポジトリごとの活動統計（自分の貢献 + リポジトリ全体の統計）
 
 ## セットアップ
 
@@ -86,6 +87,12 @@ npm run dev reviews
 npm run dev summary path/to/pr-details-file.json
 ```
 
+#### リポジトリサマリーのみ生成
+
+```bash
+npm run dev repository-summary path/to/pr-details-file.json path/to/review-summary-file.json
+```
+
 #### 現在の設定を確認
 
 ```bash
@@ -103,38 +110,42 @@ npm run dev config
 ```json
 [
   {
-    "pr_number": 127,                          // PR番号
-    "title": "feat: 新しい機能を追加",           // PRタイトル
-    "body": "詳細な説明...",                    // PR本文
+    "pr_number": 127, // PR番号
+    "title": "feat: 新しい機能を追加", // PRタイトル
+    "body": "詳細な説明...", // PR本文
     "url": "https://github.com/owner/repo/pull/127", // PR URL
-    "repository": {                            // リポジトリ情報
+    "repository": {
+      // リポジトリ情報
       "nameWithOwner": "owner/repo",
       "owner": { "login": "owner" },
       "name": "repo"
     },
-    "author": { "login": "username" },         // 作成者
-    "state": "MERGED",                         // 状態: "OPEN" | "MERGED" | "CLOSED"
-    "created_at": "2025-05-31T08:47:08Z",     // 作成日時（ISO 8601）
-    "updated_at": "2025-05-31T16:29:52Z",     // 更新日時（ISO 8601）
-    "merged_at": "2025-05-31T16:30:00Z",      // マージ日時（null可）
-    "closed_at": "2025-05-31T16:30:00Z",      // クローズ日時（null可）
-    "additions": 156,                          // 追加行数
-    "deletions": 7,                           // 削除行数
-    "changed_files": 3,                       // 変更ファイル数
-    "labels": [                               // ラベル一覧
+    "author": { "login": "username" }, // 作成者
+    "state": "MERGED", // 状態: "OPEN" | "MERGED" | "CLOSED"
+    "created_at": "2025-05-31T08:47:08Z", // 作成日時（ISO 8601）
+    "updated_at": "2025-05-31T16:29:52Z", // 更新日時（ISO 8601）
+    "merged_at": "2025-05-31T16:30:00Z", // マージ日時（null可）
+    "closed_at": "2025-05-31T16:30:00Z", // クローズ日時（null可）
+    "additions": 156, // 追加行数
+    "deletions": 7, // 削除行数
+    "changed_files": 3, // 変更ファイル数
+    "labels": [
+      // ラベル一覧
       { "name": "enhancement", "color": "a2eeef" }
     ],
-    "milestone": {                            // マイルストーン（null可）
+    "milestone": {
+      // マイルストーン（null可）
       "title": "v1.0.0",
       "due_on": "2025-06-30T00:00:00Z"
     },
-    "assignees": [                            // アサイン者一覧
+    "assignees": [
+      // アサイン者一覧
       { "login": "username" }
     ],
-    "comments_on_pr_total_count": 5,          // PR本体のコメント数
-    "reviews_submitted_total_count": 2,       // 提出されたレビュー数
-    "review_threads_total_count": 3,          // レビュースレッド数
-    "time_to_merge_hours": 7.75              // マージまでの時間（null可）
+    "comments_on_pr_total_count": 5, // PR本体のコメント数
+    "reviews_submitted_total_count": 2, // 提出されたレビュー数
+    "review_threads_total_count": 3, // レビュースレッド数
+    "time_to_merge_hours": 7.75 // マージまでの時間（null可）
   }
 ]
 ```
@@ -145,12 +156,12 @@ npm run dev config
 
 ```json
 {
-  "user": "username",                        // 対象ユーザー名
-  "period_start": "2025-01-01",             // 分析期間開始日
-  "period_end": "2025-06-01",               // 分析期間終了日
-  "reviewed_pr_count": 50,                  // レビューしたPR数（重複除去）
-  "submitted_review_action_count": 91,      // レビューアクション総数（承認、変更要求、コメント等）
-  "total_review_comments_given": 79         // レビューコメント総数
+  "user": "username", // 対象ユーザー名
+  "period_start": "2025-01-01", // 分析期間開始日
+  "period_end": "2025-06-01", // 分析期間終了日
+  "reviewed_pr_count": 50, // レビューしたPR数（重複除去）
+  "submitted_review_action_count": 91, // レビューアクション総数（承認、変更要求、コメント等）
+  "total_review_comments_given": 79 // レビューコメント総数
 }
 ```
 
@@ -160,15 +171,52 @@ npm run dev config
 
 ```json
 {
-  "user": "username",                               // 対象ユーザー名
-  "period_start": "2025-01-01",                    // 分析期間開始日
-  "period_end": "2025-06-01",                      // 分析期間終了日
-  "total_created_prs": 30,                         // 作成したPR総数
-  "total_merged_prs": 28,                          // マージされたPR総数
-  "total_additions_in_created_prs": 1234,          // 追加行数合計
-  "total_deletions_in_created_prs": 567,           // 削除行数合計
-  "total_pr_body_comments_received": 45,           // 受け取ったPRコメント総数
+  "user": "username", // 対象ユーザー名
+  "period_start": "2025-01-01", // 分析期間開始日
+  "period_end": "2025-06-01", // 分析期間終了日
+  "total_created_prs": 30, // 作成したPR総数
+  "total_merged_prs": 28, // マージされたPR総数
+  "total_additions_in_created_prs": 1234, // 追加行数合計
+  "total_deletions_in_created_prs": 567, // 削除行数合計
+  "total_pr_body_comments_received": 45, // 受け取ったPRコメント総数
   "total_review_comments_received_on_created_prs": 123 // 受け取ったレビューコメント総数
+}
+```
+
+### 4. リポジトリサマリー (`repository_summary_[ユーザー名]_[期間].json`)
+
+関係したリポジトリごとの活動統計（個人の貢献 + リポジトリ全体の統計）：
+
+```json
+{
+  "user": "username", // 対象ユーザー名
+  "period_start": "2025-01-01", // 分析期間開始日
+  "period_end": "2025-06-01", // 分析期間終了日
+  "repositories": [
+    {
+      "repository_name": "owner/repo", // リポジトリ名
+      "created_prs_count": 29, // 自分が作成したPR数
+      "merged_prs_count": 26, // 自分のマージ済みPR数
+      "total_additions": 8757, // 自分の追加行数
+      "total_deletions": 307, // 自分の削除行数
+      "total_comments_received": 44, // 自分が受け取ったコメント数
+      "total_review_comments_received": 112, // 自分が受け取ったレビューコメント数
+      "reviewed_prs_count": 0, // 自分がレビューしたPR数
+      "review_actions_count": 0, // 自分のレビューアクション数
+      "review_comments_given": 0, // 自分が投稿したレビューコメント数
+      "first_pr_created_at": "2025-05-07T04:33:09Z", // 自分の最初のPR作成日
+      "last_pr_created_at": "2025-05-31T08:47:08Z", // 自分の最新のPR作成日
+      "repository_overall_stats": {
+        "total_prs_in_period": 96, // リポジトリの全PR数（期間内）
+        "total_merged_prs_in_period": 71, // リポジトリの全マージ済みPR数
+        "total_open_prs_in_period": 7, // リポジトリの全オープンPR数
+        "total_closed_prs_in_period": 18, // リポジトリの全クローズ済みPR数
+        "user_contribution_rate": 30.21, // 自分の貢献率（%）
+        "first_pr_in_period": "2025-04-14T10:47:05Z", // リポジトリの最初のPR作成日
+        "last_pr_in_period": "2025-05-31T16:16:32Z" // リポジトリの最新のPR作成日
+      }
+    }
+  ]
 }
 ```
 
@@ -190,7 +238,8 @@ packages/github-pr-analyzer/
 │   │   ├── analyzerController.ts # メインコントローラー
 │   │   ├── pullRequestService.ts # PR収集サービス
 │   │   ├── reviewService.ts      # レビュー分析サービス
-│   │   └── summaryService.ts     # サマリー生成サービス
+│   │   ├── summaryService.ts     # サマリー生成サービス
+│   │   └── repositoryService.ts  # リポジトリサマリー生成サービス
 │   ├── types/             # 型定義
 │   │   ├── common.ts      # 共通型
 │   │   ├── github.ts      # GitHub API型

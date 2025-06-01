@@ -2,6 +2,7 @@ import { GitHubClient } from "../clients/githubClient";
 import { PullRequestService } from "./pullRequestService";
 import { ReviewService } from "./reviewService";
 import { SummaryService } from "./summaryService";
+import { RepositoryService } from "./repositoryService";
 import { ConfigManager, AppConfig } from "../config/config";
 import { FileManager } from "../utils/fileManager";
 import { Logger } from "../utils/logger";
@@ -9,6 +10,7 @@ import {
   GitHubPullRequest,
   ReviewSummary,
   OverallSummary,
+  RepositorySummary,
 } from "../types/github";
 
 export class AnalyzerController {
@@ -16,6 +18,7 @@ export class AnalyzerController {
   private pullRequestService: PullRequestService;
   private reviewService: ReviewService;
   private summaryService: SummaryService;
+  private repositoryService: RepositoryService;
   private config: AppConfig;
 
   constructor() {
@@ -24,6 +27,7 @@ export class AnalyzerController {
     this.pullRequestService = new PullRequestService(this.githubClient);
     this.reviewService = new ReviewService(this.githubClient);
     this.summaryService = new SummaryService();
+    this.repositoryService = new RepositoryService(this.githubClient);
   }
 
   /**
@@ -33,6 +37,7 @@ export class AnalyzerController {
     pullRequestsFile: string;
     reviewSummaryFile: string;
     overallSummaryFile: string;
+    repositorySummaryFile: string;
   }> {
     try {
       Logger.info("Starting GitHub PR analysis...");
@@ -51,16 +56,24 @@ export class AnalyzerController {
         pullRequestsFile
       );
 
+      // 4. Generate and save repository summary
+      const repositorySummaryFile = await this.generateRepositorySummary(
+        pullRequestsFile,
+        reviewSummaryFile
+      );
+
       Logger.info("Analysis completed successfully!");
       Logger.info(`Files generated:`);
       Logger.info(`- Pull requests: ${pullRequestsFile}`);
       Logger.info(`- Review summary: ${reviewSummaryFile}`);
       Logger.info(`- Overall summary: ${overallSummaryFile}`);
+      Logger.info(`- Repository summary: ${repositorySummaryFile}`);
 
       return {
         pullRequestsFile,
         reviewSummaryFile,
         overallSummaryFile,
+        repositorySummaryFile,
       };
     } catch (error) {
       Logger.error("Analysis failed:", error);
@@ -165,6 +178,52 @@ export class AnalyzerController {
   }
 
   /**
+   * Generate repository summary
+   */
+  private async generateRepositorySummary(
+    pullRequestsFilePath: string,
+    reviewSummaryFilePath: string
+  ): Promise<string> {
+    Logger.info("Generating repository summary...");
+
+    // Load data from files
+    const pullRequests = await FileManager.readJsonFile<GitHubPullRequest[]>(
+      pullRequestsFilePath
+    );
+    const reviewSummary = await FileManager.readJsonFile<ReviewSummary>(
+      reviewSummaryFilePath
+    );
+
+    const repositorySummary =
+      await this.repositoryService.generateRepositorySummary(
+        pullRequests,
+        reviewSummary,
+        this.config.userLogin,
+        this.config.periodStartDate,
+        this.config.periodEndDate
+      );
+
+    // Log detailed statistics
+    this.repositoryService.logRepositorySummary(repositorySummary);
+
+    const filename = FileManager.generateFilename(
+      "repository_summary",
+      this.config.userLogin,
+      this.config.periodStartDate,
+      this.config.periodEndDate
+    );
+
+    const filePath = await FileManager.writeJsonFile(
+      this.config.outputDir,
+      filename,
+      repositorySummary
+    );
+
+    Logger.info(`Saved repository summary to: ${filePath}`);
+    return filePath;
+  }
+
+  /**
    * Execute individual analysis steps
    */
   async collectPullRequestsOnly(): Promise<string> {
@@ -179,5 +238,15 @@ export class AnalyzerController {
     pullRequestsFilePath: string
   ): Promise<string> {
     return await this.generateOverallSummary(pullRequestsFilePath);
+  }
+
+  async generateRepositorySummaryOnly(
+    pullRequestsFilePath: string,
+    reviewSummaryFilePath: string
+  ): Promise<string> {
+    return await this.generateRepositorySummary(
+      pullRequestsFilePath,
+      reviewSummaryFilePath
+    );
   }
 }

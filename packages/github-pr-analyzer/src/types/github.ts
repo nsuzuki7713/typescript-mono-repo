@@ -131,6 +131,73 @@ export interface OverallSummary {
   total_review_comments_received_on_created_prs: number;
 }
 
+/**
+ * リポジトリサマリー情報（出力ファイル: repository_summary_*.json）
+ * ユーザーが関係したリポジトリごとの活動統計
+ */
+export interface RepositorySummary {
+  /** 対象ユーザー名 */
+  user: string;
+  /** 分析期間開始日（YYYY-MM-DD形式） */
+  period_start: string;
+  /** 分析期間終了日（YYYY-MM-DD形式） */
+  period_end: string;
+  /** リポジトリ別の活動統計 */
+  repositories: RepositoryActivity[];
+}
+
+/**
+ * リポジトリ別活動統計情報
+ */
+export interface RepositoryActivity {
+  /** リポジトリ名（owner/repo形式） */
+  repository_name: string;
+  /** 作成したプルリクエスト数 */
+  created_prs_count: number;
+  /** マージされたプルリクエスト数 */
+  merged_prs_count: number;
+  /** 作成したプルリクエストでの追加行数 */
+  total_additions: number;
+  /** 作成したプルリクエストでの削除行数 */
+  total_deletions: number;
+  /** 作成したプルリクエストで受け取ったコメント数 */
+  total_comments_received: number;
+  /** 作成したプルリクエストで受け取ったレビューコメント数 */
+  total_review_comments_received: number;
+  /** レビューしたプルリクエスト数 */
+  reviewed_prs_count: number;
+  /** 提出したレビューアクション数 */
+  review_actions_count: number;
+  /** レビューで投稿したコメント数 */
+  review_comments_given: number;
+  /** 最初のプルリクエスト作成日 */
+  first_pr_created_at: string | null;
+  /** 最新のプルリクエスト作成日 */
+  last_pr_created_at: string | null;
+  /** リポジトリ全体統計 */
+  repository_overall_stats: RepositoryOverallStats;
+}
+
+/**
+ * リポジトリ全体統計情報（全メンバーの活動を含む）
+ */
+export interface RepositoryOverallStats {
+  /** リポジトリの全プルリクエスト数（期間内） */
+  total_prs_in_period: number;
+  /** リポジトリの全マージ済みプルリクエスト数（期間内） */
+  total_merged_prs_in_period: number;
+  /** リポジトリの全オープンプルリクエスト数（期間内） */
+  total_open_prs_in_period: number;
+  /** リポジトリの全クローズ済みプルリクエスト数（期間内） */
+  total_closed_prs_in_period: number;
+  /** 分析対象ユーザーの貢献率（作成PR数 / 全PR数） */
+  user_contribution_rate: number;
+  /** リポジトリの最初のPR作成日（期間内） */
+  first_pr_in_period: string | null;
+  /** リポジトリの最新のPR作成日（期間内） */
+  last_pr_in_period: string | null;
+}
+
 // GraphQL response types
 export interface GraphQLPullRequest {
   number: number;

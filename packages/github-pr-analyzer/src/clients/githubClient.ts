@@ -109,4 +109,73 @@ export class GitHubClient {
     const diffMs = merged.getTime() - created.getTime();
     return diffMs / (1000 * 60 * 60); // Convert to hours
   }
+
+  /**
+   * リポジトリ全体のプルリクエスト統計を取得
+   */
+  async getRepositoryPullRequestStats(
+    repositoryName: string,
+    startDate: string,
+    endDate: string
+  ): Promise<{
+    total: number;
+    merged: number;
+    open: number;
+    closed: number;
+    firstPrDate: string | null;
+    lastPrDate: string | null;
+  }> {
+    try {
+      // 全PRを検索
+      const allPrQuery = `repo:${repositoryName} type:pr created:${startDate}..${endDate}`;
+      const allPrResponse = await this.searchPullRequests(allPrQuery, 100);
+
+      let allPrs: any[] = [];
+      let hasNextPage = true;
+      let after: string | undefined;
+
+      // 全ページを取得
+      while (hasNextPage && allPrs.length < 1000) {
+        // 最大1000件に制限
+        const response = await this.searchPullRequests(allPrQuery, 100, after);
+        allPrs = allPrs.concat(response.search.edges.map((edge) => edge.node));
+        hasNextPage = response.search.pageInfo.hasNextPage;
+        after = response.search.pageInfo.endCursor || undefined;
+      }
+
+      // 統計を計算
+      const total = allPrs.length;
+      const merged = allPrs.filter((pr) => pr.state === "MERGED").length;
+      const open = allPrs.filter((pr) => pr.state === "OPEN").length;
+      const closed = allPrs.filter((pr) => pr.state === "CLOSED").length;
+
+      // 日付を計算
+      const dates = allPrs.map((pr) => pr.createdAt).sort();
+      const firstPrDate = dates.length > 0 ? dates[0] : null;
+      const lastPrDate = dates.length > 0 ? dates[dates.length - 1] : null;
+
+      return {
+        total,
+        merged,
+        open,
+        closed,
+        firstPrDate,
+        lastPrDate,
+      };
+    } catch (error) {
+      console.error(
+        `Error fetching repository stats for ${repositoryName}:`,
+        error
+      );
+      // エラーが発生した場合はデフォルト値を返す
+      return {
+        total: 0,
+        merged: 0,
+        open: 0,
+        closed: 0,
+        firstPrDate: null,
+        lastPrDate: null,
+      };
+    }
+  }
 }

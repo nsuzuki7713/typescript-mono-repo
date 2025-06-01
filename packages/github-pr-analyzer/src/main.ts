@@ -38,7 +38,9 @@ async function main() {
   // 全分析実行コマンド
   program
     .command("analyze")
-    .description("Run full analysis (pull requests + reviews + summary)")
+    .description(
+      "Run full analysis (pull requests + reviews + summary + repository summary)"
+    )
     .action(async () => {
       try {
         const controller = new AnalyzerController();
@@ -49,35 +51,35 @@ async function main() {
       }
     });
 
-  // プルリクエスト収集コマンド
+  // プルリクエスト詳細収集コマンド
   program
     .command("pull-requests")
     .description("Collect pull request details only")
     .action(async () => {
       try {
         const controller = new AnalyzerController();
-        await controller.collectPullRequestDetails();
+        await controller.collectPullRequestsOnly();
       } catch (error) {
         Logger.error(`Pull request collection failed: ${error}`);
         process.exit(1);
       }
     });
 
-  // レビュー収集コマンド
+  // レビューサマリー生成コマンド
   program
     .command("reviews")
-    .description("Collect review summary only")
+    .description("Generate review summary only")
     .action(async () => {
       try {
         const controller = new AnalyzerController();
-        await controller.generateReviewSummary();
+        await controller.generateReviewSummaryOnly();
       } catch (error) {
-        Logger.error(`Review collection failed: ${error}`);
+        Logger.error(`Review summary generation failed: ${error}`);
         process.exit(1);
       }
     });
 
-  // サマリー生成コマンド
+  // 全体サマリー生成コマンド
   program
     .command("summary")
     .description("Generate overall summary from existing PR details file")
@@ -85,9 +87,30 @@ async function main() {
     .action(async (prDetailsFile: string) => {
       try {
         const controller = new AnalyzerController();
-        await controller.generateOverallSummary(prDetailsFile);
+        await controller.generateOverallSummaryOnly(prDetailsFile);
       } catch (error) {
         Logger.error(`Summary generation failed: ${error}`);
+        process.exit(1);
+      }
+    });
+
+  // リポジトリサマリー生成コマンド
+  program
+    .command("repository-summary")
+    .description(
+      "Generate repository summary from existing PR details and review summary files"
+    )
+    .argument("<pr-details-file>", "Path to PR details JSON file")
+    .argument("<review-summary-file>", "Path to review summary JSON file")
+    .action(async (prDetailsFile: string, reviewSummaryFile: string) => {
+      try {
+        const controller = new AnalyzerController();
+        await controller.generateRepositorySummaryOnly(
+          prDetailsFile,
+          reviewSummaryFile
+        );
+      } catch (error) {
+        Logger.error(`Repository summary generation failed: ${error}`);
         process.exit(1);
       }
     });
@@ -124,5 +147,3 @@ main().catch((error) => {
   Logger.error(`Unexpected error: ${error}`);
   process.exit(1);
 });
-
-export { AnalyzerController };
