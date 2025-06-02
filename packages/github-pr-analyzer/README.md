@@ -5,17 +5,19 @@
 ## 機能
 
 ### 個人分析機能
+
 1. **プルリクエスト詳細情報の収集**: 指定期間内に作成した PR の詳細情報を JSON ファイルに出力
 2. **レビュー活動サマリーの集計**: 指定期間内のレビュー活動に関するサマリー情報を JSON ファイルに出力
 3. **全体サマリーの生成**: プルリクエストデータから活動全体のサマリー情報を集計
 4. **リポジトリサマリーの生成**: 関係したリポジトリごとの活動統計（自分の貢献 + リポジトリ全体の統計）
-5. **分析プロンプト生成**: 実際のデータを埋め込んだAI分析用プロンプトファイルを生成
+5. **分析プロンプト生成**: 実際のデータを埋め込んだ AI 分析用プロンプトファイルを生成
 
 ### チーム分析機能
+
 6. **チーム全体分析**: 複数メンバーの活動を一括分析し、チーム全体の統計とメンバー比較を生成
 7. **チームサマリー生成**: チーム全体の生産性指標とメンバー間の貢献度比較
 8. **メンバー詳細データ**: 各チームメンバーの個別詳細データを一括生成
-9. **チーム分析プロンプト生成**: チームデータを埋め込んだAI分析用プロンプトファイルを生成
+9. **チーム分析プロンプト生成**: チームデータを埋め込んだ AI 分析用プロンプトファイルを生成
 
 ## セットアップ
 
@@ -65,19 +67,11 @@ cp team-config.json.example team-config.json
 ```json
 {
   "team_name": "development-team",
-  "team_members": [
-    "member1",
-    "member2", 
-    "member3",
-    "app/bot-account"
-  ],
+  "team_members": ["member1", "member2", "member3", "app/bot-account"],
   "github_token": "your_github_token_here",
   "period_start_date": "2024-01-01",
   "period_end_date": "2024-12-31",
-  "repositories": [
-    "owner/repo1",
-    "owner/repo2"
-  ],
+  "repositories": ["owner/repo1", "owner/repo2"],
   "output_dir": "./output"
 }
 ```
@@ -133,7 +127,7 @@ npm run dev summary path/to/pr-details-file.json
 npm run dev repository-summary path/to/pr-details-file.json path/to/review-summary-file.json
 ```
 
-##### AI分析用プロンプト生成
+##### AI 分析用プロンプト生成
 
 ```bash
 npm run dev generate-prompt
@@ -159,7 +153,7 @@ npm run dev team-analyze
 npm run dev team-config
 ```
 
-#### チーム分析用AI分析プロンプト生成
+#### チーム分析用 AI 分析プロンプト生成
 
 ```bash
 npm run dev generate-team-prompt
@@ -290,7 +284,7 @@ npm run dev generate-team-prompt
 
 ### 5. 分析プロンプトファイル (`analysis_prompt_[ユーザー名]_[期間].txt`)
 
-AI分析用のプロンプトファイル。実際の分析データが埋め込まれており、ChatGPTなどのAIツールにそのまま貼り付けて使用できます。
+AI 分析用のプロンプトファイル。実際の分析データが埋め込まれており、ChatGPT などの AI ツールにそのまま貼り付けて使用できます。
 
 ### チーム分析出力ファイル
 
@@ -348,7 +342,7 @@ AI分析用のプロンプトファイル。実際の分析データが埋め込
 ```json
 {
   "member": "member1",
-  "period_start": "2024-01-01", 
+  "period_start": "2024-01-01",
   "period_end": "2024-12-31",
   "pull_requests": [...], // プルリクエスト詳細データの配列
   "review_summary": {...} // レビュー活動サマリー
@@ -357,7 +351,7 @@ AI分析用のプロンプトファイル。実際の分析データが埋め込
 
 ### 3. チーム分析プロンプトファイル (`team_analysis_prompt_[チーム名]_[期間].txt`)
 
-AI分析用のチーム分析プロンプトファイル。チーム全体のデータと各メンバーの詳細データが埋め込まれており、ChatGPTなどのAIツールにそのまま貼り付けてチーム評価に使用できます。
+AI 分析用のチーム分析プロンプトファイル。チーム全体のデータと各メンバーの詳細データが埋め込まれており、ChatGPT などの AI ツールにそのまま貼り付けてチーム評価に使用できます。
 
 ## プロジェクト構成
 
@@ -425,43 +419,48 @@ npm run lint:fix
 - Personal Access Token は適切に管理し、公開リポジトリにコミットしないよう注意してください
 - チーム分析では、メンバー数が多い場合やデータ期間が長い場合、実行時間が大幅に長くなる可能性があります
 - 特殊文字を含むユーザー名（`app/bot-name`など）も適切に処理されます
-- プロンプト生成機能で生成されたファイルは、そのままAIツールにコピー&ペーストして使用できます
+- プロンプト生成機能で生成されたファイルは、そのまま AI ツールにコピー&ペーストして使用できます
 
 ## 使用例
 
 ### 個人評価での使用例
 
 1. 分析を実行
+
 ```bash
 npm run dev analyze
 ```
 
 2. プロンプトファイルを生成
+
 ```bash
 npm run dev generate-prompt
 ```
 
-3. 生成されたプロンプトファイルをChatGPTにコピー&ペーストして分析依頼
+3. 生成されたプロンプトファイルを ChatGPT にコピー&ペーストして分析依頼
 
 ### チーム評価での使用例
 
 1. チーム設定を作成
+
 ```bash
 cp team-config.json.example team-config.json
 # team-config.jsonを編集
 ```
 
 2. チーム分析を実行
+
 ```bash
 npm run dev team-analyze
 ```
 
 3. チーム分析プロンプトを生成
+
 ```bash
 npm run dev generate-team-prompt
 ```
 
-4. 生成されたチーム分析プロンプトファイルをChatGPTにコピー&ペーストしてチーム評価を依頼
+4. 生成されたチーム分析プロンプトファイルを ChatGPT にコピー&ペーストしてチーム評価を依頼
 
 ## トラブルシューティング
 
