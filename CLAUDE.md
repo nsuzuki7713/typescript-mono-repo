@@ -76,3 +76,27 @@ Each package maintains its own:
 The workspace uses a single `pnpm-lock.yaml` file at the root for dependency management. When working on a specific package, you can either:
 1. Navigate to the package directory and use npm/pnpm commands
 2. Use pnpm filtering from the root: `pnpm --filter <package-name> <command>`
+
+## Package Documentation
+
+### github-pr-analyzer
+A TypeScript CLI tool for engineering self-evaluation and team performance analysis through GitHub Pull Request data collection and analysis.
+
+**Purpose**: Collects, analyzes, and reports GitHub PR activities to help engineers and teams assess contributions, productivity, and collaboration patterns.
+
+**Key Features**:
+- Individual PR data collection and analysis (created PRs, review activities, statistical summaries)
+- Team analysis capabilities with multi-member batch processing
+- Repository-level insights and contribution analysis
+- AI-ready analysis prompts generation for performance evaluation
+- Comprehensive TypeScript architecture with GraphQL GitHub API integration
+
+**Architecture**: Service-oriented design with clients/, config/, services/, types/, and utils/ directories. Uses Commander.js for CLI, @octokit/graphql for GitHub API, and TypeScript with strict typing.
+
+**Configuration**: Uses environment variables (.env) for GitHub token, user login, date periods, and optional repository filtering. Supports both individual and team analysis configurations.
+
+**Commands**:
+- Individual: `analyze`, `pull-requests`, `reviews`, `summary`, `repository-summary`, `generate-prompt`, `config`
+- Team: `team-analyze`, `team-config`, `generate-team-prompt`
+
+**Output**: Generates JSON files with PR details, review summaries, repository analysis, and AI-ready evaluation prompts for both individual and team assessments.
