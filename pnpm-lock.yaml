@@ -133,6 +133,18 @@ importers:
         specifier: ^4.7.4
         version: 4.9.5
 
+  packages/claude-test:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.1
+      ts-node:
+        specifier: ^10.9.0
+        version: 10.9.2(@swc/core@1.12.1)(@types/node@20.19.1)(typescript@5.8.3)
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+
   packages/cloudFunctions:
     dependencies:
       firebase-admin:
