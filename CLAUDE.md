@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+日本語でやりとりお願いします。
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Repository Structure
@@ -7,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a package-based TypeScript monorepo with 18 packages in `/packages/` managed by pnpm workspaces. Each package has its own `package.json`, dependencies, and configuration files.
 
 ### Package Categories
+
 - **Development Tools**: `adhocScripts`, `github-pr-analyzer`, `nodeTemplate`, `playground`
 - **Competitive Programming**: `at-coder`
 - **Web Applications**: `next-sample`, `nextjs-gihyo-book`, `react-sample`, `trpc-twitter-sample`
@@ -16,6 +19,7 @@ This is a package-based TypeScript monorepo with 18 packages in `/packages/` man
 ## Common Development Commands
 
 ### Workspace-wide Commands (run from root)
+
 ```bash
 pnpm build           # Build all packages
 pnpm dev             # Start development servers for all packages
@@ -25,6 +29,7 @@ pnpm lint:fix        # Auto-fix linting issues in all packages
 ```
 
 ### Package-specific Commands
+
 Navigate to the specific package directory or use pnpm filtering:
 
 ```bash
@@ -38,6 +43,7 @@ pnpm --filter <package-name> test     # Run tests for specific package
 ```
 
 ### Legacy Commands (still work within package directories)
+
 ```bash
 npm run build    # TypeScript compilation or framework-specific build
 npm run dev      # Start development server (most packages)
@@ -62,6 +68,7 @@ npm run lint:fix    # Run ESLint with auto-fix
 ## VSCode Configuration
 
 The repository has VSCode settings configured for:
+
 - Format on save with Prettier
 - ESLint auto-fix on save
 - Auto-detection of ESLint working directories
@@ -69,22 +76,26 @@ The repository has VSCode settings configured for:
 ## Working with Packages
 
 Each package maintains its own:
+
 - Dependencies in `package.json`
 - TypeScript configuration in `tsconfig.json`
 - Jest configuration in `jest.config.js`
 
 The workspace uses a single `pnpm-lock.yaml` file at the root for dependency management. When working on a specific package, you can either:
+
 1. Navigate to the package directory and use npm/pnpm commands
 2. Use pnpm filtering from the root: `pnpm --filter <package-name> <command>`
 
 ## Package Documentation
 
 ### github-pr-analyzer
+
 A TypeScript CLI tool for engineering self-evaluation and team performance analysis through GitHub Pull Request data collection and analysis.
 
 **Purpose**: Collects, analyzes, and reports GitHub PR activities to help engineers and teams assess contributions, productivity, and collaboration patterns.
 
 **Key Features**:
+
 - Individual PR data collection and analysis (created PRs, review activities, statistical summaries)
 - Team analysis capabilities with multi-member batch processing
 - Repository-level insights and contribution analysis
@@ -96,6 +107,7 @@ A TypeScript CLI tool for engineering self-evaluation and team performance analy
 **Configuration**: Uses environment variables (.env) for GitHub token, user login, date periods, and optional repository filtering. Supports both individual and team analysis configurations.
 
 **Commands**:
+
 - Individual: `analyze`, `pull-requests`, `reviews`, `summary`, `repository-summary`, `generate-prompt`, `config`
 - Team: `team-analyze`, `team-config`, `generate-team-prompt`
 
