@@ -21,6 +21,7 @@ program
   .requiredOption('-c, --channel <channelId>', 'Slack channel ID (e.g., C1234567890)')
   .option('-t, --token <token>', 'Slack bot token (or use SLACK_BOT_TOKEN env var)')
   .option('-o, --output <fileName>', 'Output file name', 'slack-messages.txt')
+  .option('-f, --format <format>', 'Output format (text|json|markdown)', 'text')
   .option('-l, --limit <number>', 'Maximum number of messages to extract', '100')
   .option('-e, --exclude <userIds>', 'Comma-separated list of user IDs to exclude', '')
   .action(async (options: any) => {
@@ -30,7 +31,8 @@ program
         channelId: options.channel,
         excludedUserIds: options.exclude ? options.exclude.split(',').map((id: string) => id.trim()) : [],
         messageLimit: parseInt(options.limit, 10),
-        outputFileName: options.output
+        outputFileName: options.output,
+        outputFormat: options.format || 'text'
       };
 
       if (!config.token) {
@@ -53,7 +55,7 @@ program
       const extractor = new SlackMessageExtractor(config);
       const { messages, stats } = await extractor.extractMessages();
       
-      await FileExporter.exportToFile(messages, config.outputFileName, stats);
+      await FileExporter.exportToFile(messages, config.outputFileName, stats, config.outputFormat || 'text');
       
       console.log('\n🎉 Extraction completed successfully!');
       

@@ -18,6 +18,7 @@ export interface ExtractorConfig {
   excludedUserIds: string[];
   messageLimit: number;
   outputFileName: string;
+  outputFormat?: 'text' | 'json' | 'markdown';
 }
 
 export interface FormattedMessage {

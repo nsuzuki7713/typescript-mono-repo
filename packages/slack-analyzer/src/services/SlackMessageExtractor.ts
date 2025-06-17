@@ -26,7 +26,10 @@ export class SlackMessageExtractor {
       const formattedMessages = await this.formatMessages(messages);
       
       const endTime = Date.now();
-      const actualTimeMinutes = Math.round((endTime - startTime) / 60000);
+      const actualTimeSeconds = Math.round((endTime - startTime) / 1000);
+      const actualTimeMinutes = actualTimeSeconds >= 60 ? 
+        Math.round(actualTimeSeconds / 60) : 
+        Math.max(1, Math.round(actualTimeSeconds / 60));
       
       const stats: ExtractorStats = {
         totalMessages: messages.length,
@@ -38,7 +41,7 @@ export class SlackMessageExtractor {
       console.log(`\n✅ Extraction completed!`);
       console.log(`📊 Total messages: ${stats.totalMessages}`);
       console.log(`💬 Total replies: ${stats.totalReplies}`);
-      console.log(`⏱️  Actual processing time: ${actualTimeMinutes} minutes`);
+      console.log(`⏱️  Actual processing time: ${actualTimeSeconds} seconds (${actualTimeMinutes} minutes)`);
 
       return { messages: formattedMessages, stats };
     } catch (error) {
@@ -112,11 +115,11 @@ export class SlackMessageExtractor {
 
     do {
       try {
-        console.log(`🔄 API Request ${++requestCount}: Fetching up to 15 messages...`);
+        console.log(`🔄 API Request ${++requestCount}: Fetching up to 50 messages...`);
         
         const result = await this.client.conversations.history({
           channel: this.config.channelId,
-          limit: 15,
+          limit: 50,
           cursor,
           oldest: '0'
         });
@@ -173,7 +176,7 @@ export class SlackMessageExtractor {
         const result = await this.client.conversations.replies({
           channel,
           ts: threadTs,
-          limit: 15
+          limit: 50
         });
 
         if (!result.messages) return [];
@@ -277,8 +280,8 @@ export class SlackMessageExtractor {
   }
 
   private estimateProcessingTime(): number {
-    const requestsNeeded = Math.ceil(this.config.messageLimit / 15);
-    const estimatedMinutes = Math.ceil(requestsNeeded * 1.2);
+    const requestsNeeded = Math.ceil(this.config.messageLimit / 50);
+    const estimatedMinutes = Math.max(1, Math.ceil(requestsNeeded * 0.1));
     return estimatedMinutes;
   }
 

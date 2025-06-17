@@ -26,10 +26,11 @@ Slack APIを使用して、特定のチャンネルからメッセージを取�
 
 ## APIレート制限について
 
-Slack Marketplaceに承認されていないアプリの場合：
-- `conversations.history`: 1分間に1リクエスト、最大15メッセージ/リクエスト
-- `conversations.replies`: 1分間に1リクエスト、最大15メッセージ/リクエスト
-- `users.info`: 1分間に1リクエスト
+Slack APIの制限と最適化：
+- `conversations.history`: 50メッセージ/リクエスト（最適化済み）
+- `conversations.replies`: 50メッセージ/リクエスト（最適化済み）
+- `users.info`: オンデマンド取得でrate-limit対応
+- 実用的な速度とAPI効率のバランスを重視
 
 このツールはrate-limitエラーが発生した時のみ自動的に待機・リトライし、可能な限り高速で取得します。
 
@@ -121,8 +122,23 @@ await FileExporter.exportToFile(messages, config.outputFileName, stats);
 | `--channel` | `-c` | SlackチャンネルID | ✅ | - |
 | `--token` | `-t` | Slackボットトークン | - | 環境変数から取得 |
 | `--output` | `-o` | 出力ファイル名 | - | `slack-messages.txt` |
-| `--limit` | `-l` | 取得メッセージ数上限 | - | `100` |
+| `--limit` | `-l` | 取得するメインメッセージ数の上限 | - | `100` |
 | `--exclude` | `-e` | 除外ユーザーID（カンマ区切り） | - | なし |
+
+### 重要な注意点
+
+**`--limit`について**:
+- **メインメッセージのみカウント**: スレッドの返信は制限数に含まれません
+- **例**: `--limit 10`で10個のメインメッセージを取得し、それぞれにスレッド返信があれば全て取得されます
+- **実際の出力**: 10個のメインメッセージ + すべてのスレッド返信 = 合計数十個のメッセージになる可能性があります
+
+**使用例**:
+```bash
+# 5個のメインメッセージとそのスレッド返信をすべて取得
+pnpm dev extract --channel C123456 --limit 5
+
+# 結果: 5個のメイン + 20個のスレッド返信 = 計25個のメッセージ出力
+```
 
 ## 開発
 
