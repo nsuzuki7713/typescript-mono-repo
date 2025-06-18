@@ -15,6 +15,10 @@ export class SlackMessageExtractor {
     const startTime = Date.now();
     console.log('🚀 Starting message extraction...');
     
+    if (this.config.startDate || this.config.endDate) {
+      console.log('📅 Date filtering enabled');
+    }
+    
     const estimatedTime = this.estimateProcessingTime();
     console.log(`⏱️  Estimated processing time: ${estimatedTime} minutes`);
     console.log('📋 Required Slack App permissions: channels:history, groups:history, im:history, mpim:history\n');
@@ -113,16 +117,26 @@ export class SlackMessageExtractor {
     
     console.log('📥 Fetching messages...');
 
+    // 日付範囲をUnixタイムスタンプに変換
+    const oldest = this.config.startDate ? this.dateToTimestamp(this.config.startDate) : '0';
+    const latest = this.config.endDate ? this.dateToTimestamp(this.config.endDate, true) : undefined;
+
     do {
       try {
         console.log(`🔄 API Request ${++requestCount}: Fetching up to 50 messages...`);
         
-        const result = await this.client.conversations.history({
+        const requestParams: any = {
           channel: this.config.channelId,
           limit: 50,
           cursor,
-          oldest: '0'
-        });
+          oldest
+        };
+
+        if (latest) {
+          requestParams.latest = latest;
+        }
+
+        const result = await this.client.conversations.history(requestParams);
 
         if (result.messages) {
           const filteredMessages = result.messages
@@ -299,6 +313,14 @@ export class SlackMessageExtractor {
     } else {
       throw error;
     }
+  }
+
+  private dateToTimestamp(dateString: string, endOfDay: boolean = false): string {
+    const date = new Date(dateString + 'T00:00:00.000Z');
+    if (endOfDay) {
+      date.setUTCHours(23, 59, 59, 999);
+    }
+    return Math.floor(date.getTime() / 1000).toString();
   }
 
   private handleError(error: any): void {

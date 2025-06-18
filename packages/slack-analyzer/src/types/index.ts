@@ -19,6 +19,8 @@ export interface ExtractorConfig {
   messageLimit: number;
   outputFileName: string;
   outputFormat?: 'text' | 'json' | 'markdown';
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface FormattedMessage {

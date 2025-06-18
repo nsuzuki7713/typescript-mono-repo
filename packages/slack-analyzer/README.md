@@ -124,6 +124,8 @@ await FileExporter.exportToFile(messages, config.outputFileName, stats);
 | `--output` | `-o` | 出力ファイル名 | - | `slack-messages.txt` |
 | `--limit` | `-l` | 取得するメインメッセージ数の上限 | - | `100` |
 | `--exclude` | `-e` | 除外ユーザーID（カンマ区切り） | - | なし |
+| `--start-date` | - | 開始日（YYYY-MM-DD形式） | - | 全期間 |
+| `--end-date` | - | 終了日（YYYY-MM-DD形式） | - | 現在まで |
 
 ### 重要な注意点
 
@@ -138,6 +140,21 @@ await FileExporter.exportToFile(messages, config.outputFileName, stats);
 pnpm dev extract --channel C123456 --limit 5
 
 # 結果: 5個のメイン + 20個のスレッド返信 = 計25個のメッセージ出力
+```
+
+**日付範囲指定の例**:
+```bash
+# 2025年6月の1週間のメッセージを取得
+pnpm dev extract --channel C123456 --start-date 2025-06-10 --end-date 2025-06-17
+
+# 6月1日以降のメッセージを取得
+pnpm dev extract --channel C123456 --start-date 2025-06-01
+
+# 6月17日までのメッセージを取得
+pnpm dev extract --channel C123456 --end-date 2025-06-17
+
+# JSON形式で期間指定
+pnpm dev extract --channel C123456 --start-date 2025-06-10 --end-date 2025-06-17 --format json
 ```
 
 ## 開発

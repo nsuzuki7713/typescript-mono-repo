@@ -24,6 +24,8 @@ program
   .option('-f, --format <format>', 'Output format (text|json|markdown)', 'text')
   .option('-l, --limit <number>', 'Maximum number of messages to extract', '100')
   .option('-e, --exclude <userIds>', 'Comma-separated list of user IDs to exclude', '')
+  .option('--start-date <date>', 'Start date (YYYY-MM-DD format, e.g., 2025-06-01)')
+  .option('--end-date <date>', 'End date (YYYY-MM-DD format, e.g., 2025-06-17)')
   .action(async (options: any) => {
     try {
       const config: ExtractorConfig = {
@@ -32,7 +34,9 @@ program
         excludedUserIds: options.exclude ? options.exclude.split(',').map((id: string) => id.trim()) : [],
         messageLimit: parseInt(options.limit, 10),
         outputFileName: options.output,
-        outputFormat: options.format || 'text'
+        outputFormat: options.format || 'text',
+        startDate: options.startDate,
+        endDate: options.endDate
       };
 
       if (!config.token) {
@@ -49,6 +53,7 @@ program
       console.log(`   Channel ID: ${config.channelId}`);
       console.log(`   Message limit: ${config.messageLimit}`);
       console.log(`   Output file: ${config.outputFileName}`);
+      console.log(`   Date range: ${config.startDate || 'All time'} to ${config.endDate || 'Now'}`);
       console.log(`   Excluded users: ${config.excludedUserIds.length > 0 ? config.excludedUserIds.join(', ') : 'None'}`);
       console.log('');
 
