@@ -96,7 +96,7 @@ export class GitHubClient {
   }
 
   /**
-   * Calculate time to merge in hours
+   * Calculate time to merge in minutes
    */
   calculateTimeToMerge(
     createdAt: string,
@@ -107,7 +107,7 @@ export class GitHubClient {
     const created = new Date(createdAt);
     const merged = new Date(mergedAt);
     const diffMs = merged.getTime() - created.getTime();
-    return diffMs / (1000 * 60 * 60); // Convert to hours
+    return diffMs / (1000 * 60); // Convert to minutes
   }
 
   /**

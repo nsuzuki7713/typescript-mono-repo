@@ -101,6 +101,9 @@ export class PullRequestService {
       ? this.client.calculateTimeToMerge(pr.createdAt, pr.mergedAt)
       : null;
 
+    const firstApprovalInfo = this.getFirstApprovalInfo(pr);
+    const readyForReviewAt = this.getReadyForReviewTime(pr);
+
     return {
       pr_number: pr.number,
       title: pr.title,
@@ -136,7 +139,11 @@ export class PullRequestService {
       comments_on_pr_total_count: pr.comments.totalCount,
       reviews_submitted_total_count: pr.reviews.totalCount,
       review_threads_total_count: pr.reviewThreads.totalCount,
-      time_to_merge_hours: timeToMerge,
+      time_to_merge_minutes: timeToMerge,
+      time_to_first_approval_minutes: firstApprovalInfo.timeToFirstApproval,
+      first_approval_at: firstApprovalInfo.firstApprovalAt,
+      first_approver: firstApprovalInfo.firstApprover,
+      ready_for_review_at: readyForReviewAt,
     };
   }
 
@@ -155,5 +162,60 @@ export class PullRequestService {
         Logger.warn(`Unknown PR state: ${state}, defaulting to OPEN`);
         return "OPEN";
     }
+  }
+
+  /**
+   * Calculate time to first approval in hours
+   */
+  private getFirstApprovalInfo(pr: GraphQLPullRequest): {
+    timeToFirstApproval: number | null;
+    firstApprovalAt: string | null;
+    firstApprover: string | null;
+  } {
+    if (!pr.reviews || pr.reviews.nodes.length === 0) {
+      return { timeToFirstApproval: null, firstApprovalAt: null, firstApprover: null };
+    }
+
+    const approvalReviews = pr.reviews.nodes
+      .filter((review) => review.state === 'APPROVED')
+      .sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
+
+    const firstApproval = approvalReviews[0];
+
+    if (!firstApproval) {
+      return { timeToFirstApproval: null, firstApprovalAt: null, firstApprover: null };
+    }
+
+    const readyForReviewEvents = pr.timelineItems.nodes || [];
+    const lastReadyForReviewEvent = readyForReviewEvents.length > 0 ? readyForReviewEvents[readyForReviewEvents.length - 1] : null;
+
+    const lastReadyForReviewTime = lastReadyForReviewEvent
+      ? new Date(lastReadyForReviewEvent.createdAt).getTime()
+      : new Date(pr.createdAt).getTime();
+
+    const firstApprovalTime = new Date(firstApproval.submittedAt).getTime();
+    const timeToFirstApproval = (firstApprovalTime - lastReadyForReviewTime) / (1000 * 60);
+
+    return {
+      timeToFirstApproval,
+      firstApprovalAt: firstApproval.submittedAt,
+      firstApprover: firstApproval.author.login,
+    };
+  }
+
+  /**
+   * Get the time when PR became ready for review (last time it was converted from draft to open)
+   */
+  private getReadyForReviewTime(pr: GraphQLPullRequest): string {
+    const readyForReviewEvents = pr.timelineItems.nodes || [];
+    
+    if (readyForReviewEvents.length > 0) {
+      // Get the last ready for review event (in case the PR was converted back to draft and then back to ready)
+      const lastReadyForReviewEvent = readyForReviewEvents[readyForReviewEvents.length - 1];
+      return lastReadyForReviewEvent?.createdAt || pr.createdAt;
+    }
+    
+    // If no ready for review events found, assume it was ready from creation
+    return pr.createdAt;
   }
 }

@@ -207,7 +207,11 @@ npm run dev generate-team-prompt
     "comments_on_pr_total_count": 5, // PR本体のコメント数
     "reviews_submitted_total_count": 2, // 提出されたレビュー数
     "review_threads_total_count": 3, // レビュースレッド数
-    "time_to_merge_hours": 7.75 // マージまでの時間（null可）
+    "time_to_merge_minutes": 465, // マージまでの時間（分単位、null可）
+    "time_to_first_approval_minutes": 150, // 最初の承認までの時間（分単位、null可）
+    "first_approval_at": "2025-05-31T11:17:08Z", // 最初の承認日時（null可）
+    "first_approver": "another-user", // 最初の承認者（null可）
+    "ready_for_review_at": "2025-05-31T08:47:08Z" // レビュー可能になった日時（ISO 8601）
   }
 ]
 ```

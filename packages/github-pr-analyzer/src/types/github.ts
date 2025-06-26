@@ -83,8 +83,16 @@ export interface GitHubPullRequest {
   reviews_submitted_total_count: number;
   /** レビュースレッド総数 */
   review_threads_total_count: number;
-  /** マージまでの所要時間（時間単位、null可） */
-  time_to_merge_hours: number | null;
+  /** マージまでの所要時間（分単位、null可） */
+  time_to_merge_minutes: number | null;
+  /** 最初の承認までの所要時間（分単位、null可） */
+  time_to_first_approval_minutes: number | null;
+  /** 最初の承認日時（ISO 8601形式、null可） */
+  first_approval_at: string | null;
+  /** 最初の承認者（null可） */
+  first_approver: string | null;
+  /** レビュー可能になった日時（ISO 8601形式） */
+  ready_for_review_at: string;
 }
 
 /**
@@ -336,9 +344,21 @@ export interface GraphQLPullRequest {
   };
   reviews: {
     totalCount: number;
+    nodes: Array<{
+      state: string;
+      submittedAt: string;
+      author: {
+        login: string;
+      };
+    }>;
   };
   reviewThreads: {
     totalCount: number;
+  };
+  timelineItems: {
+    nodes: Array<{
+      createdAt: string;
+    }>;
   };
 }
 

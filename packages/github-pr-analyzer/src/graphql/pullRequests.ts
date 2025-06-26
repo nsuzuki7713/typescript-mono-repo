@@ -44,11 +44,25 @@ export const SEARCH_PULL_REQUESTS_QUERY = `
             comments {
               totalCount
             }
-            reviews {
+            reviews(first: 10) {
               totalCount
+              nodes {
+                state
+                submittedAt
+                author {
+                  login
+                }
+              }
             }
             reviewThreads {
               totalCount
+            }
+            timelineItems(last: 50, itemTypes: [READY_FOR_REVIEW_EVENT]) {
+              nodes {
+                ... on ReadyForReviewEvent {
+                  createdAt
+                }
+              }
             }
           }
         }
