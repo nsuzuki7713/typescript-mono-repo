@@ -114,6 +114,23 @@ export class AnalyzerController {
   }
 
   /**
+   * Collect pull request details and return the data
+   */
+  async collectPullRequestsAndReturn(): Promise<GitHubPullRequest[]> {
+    Logger.info("Collecting pull request details...");
+
+    const pullRequests = await this.pullRequestService.fetchUserPullRequests(
+      this.config.userLogin,
+      this.config.periodStartDate,
+      this.config.periodEndDate,
+      this.config.repositories
+    );
+
+    Logger.info(`Collected ${pullRequests.length} pull requests`);
+    return pullRequests;
+  }
+
+  /**
    * Generate review summary and save to JSON file
    */
   async generateReviewSummary(): Promise<string> {
@@ -140,6 +157,38 @@ export class AnalyzerController {
 
     Logger.info(`Saved review summary to: ${filePath}`);
     return filePath;
+  }
+
+  /**
+   * Generate review summary and return the data
+   */
+  async generateReviewSummaryAndReturn(): Promise<ReviewSummary> {
+    Logger.info("Generating review summary...");
+
+    const reviewSummary = await this.reviewService.generateReviewSummary(
+      this.config.userLogin,
+      this.config.periodStartDate,
+      this.config.periodEndDate
+    );
+
+    Logger.info(`Generated review summary for ${reviewSummary.user}`);
+    return reviewSummary;
+  }
+
+  /**
+   * Collect all users' pull request details and return the data
+   */
+  async collectAllUsersPullRequestsAndReturn(): Promise<GitHubPullRequest[]> {
+    Logger.info("Collecting all users' pull request details...");
+
+    const pullRequests = await this.pullRequestService.fetchAllPullRequests(
+      this.config.periodStartDate,
+      this.config.periodEndDate,
+      this.config.repositories
+    );
+
+    Logger.info(`Collected ${pullRequests.length} pull requests from all users`);
+    return pullRequests;
   }
 
   /**

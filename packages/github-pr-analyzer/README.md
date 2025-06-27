@@ -19,6 +19,13 @@
 8. **メンバー詳細データ**: 各チームメンバーの個別詳細データを一括生成
 9. **チーム分析プロンプト生成**: チームデータを埋め込んだ AI 分析用プロンプトファイルを生成
 
+### CSV エクスポート機能
+
+10. **プルリクエスト CSV エクスポート**: スプレッドシート分析用にプルリクエストデータを CSV 形式で出力
+11. **全ユーザー CSV エクスポート**: リポジトリ内全メンバーのプルリクエストを一括 CSV 出力（デフォルト）
+12. **個人 CSV エクスポート**: 特定ユーザーのプルリクエストとレビューデータを CSV 出力
+13. **複数出力形式**: プルリクのみ、レビューのみ、統合データの 3 種類の出力形式をサポート
+
 ## セットアップ
 
 ### 1. 依存関係のインストール
@@ -137,6 +144,44 @@ npm run dev generate-prompt
 
 ```bash
 npm run dev config
+```
+
+### CSV エクスポート
+
+#### 全ユーザーのプルリクエストを CSV エクスポート（デフォルト）
+
+```bash
+npm run dev export-csv
+```
+
+#### 特定ユーザーのプルリクエストを CSV エクスポート
+
+```bash
+npm run dev export-csv --single-user -u ユーザー名
+```
+
+#### プルリクエストのみを CSV エクスポート
+
+```bash
+npm run dev export-csv --pr-only
+```
+
+#### レビューサマリーのみを CSV エクスポート
+
+```bash
+npm run dev export-csv --review-only --single-user -u ユーザー名
+```
+
+#### 統合データ（プルリク+レビュー）を CSV エクスポート
+
+```bash
+npm run dev export-csv --combined --single-user -u ユーザー名
+```
+
+#### カスタム期間・出力先を指定
+
+```bash
+npm run dev export-csv -s 2025-01-01 -e 2025-12-31 -o ./custom-output
 ```
 
 ### チーム分析
@@ -357,6 +402,46 @@ AI 分析用のプロンプトファイル。実際の分析データが埋め�
 
 AI 分析用のチーム分析プロンプトファイル。チーム全体のデータと各メンバーの詳細データが埋め込まれており、ChatGPT などの AI ツールにそのまま貼り付けてチーム評価に使用できます。
 
+### CSV エクスポート出力ファイル
+
+CSV 形式でのエクスポート機能により、Google スプレッドシートや Looker での分析が可能です。
+
+### 1. 全ユーザープルリクエスト CSV (`all_users_pull_requests_[開始日]_[終了日].csv`)
+
+リポジトリ内の全ユーザーのプルリクエストデータ（24 列）：
+
+```csv
+pr_number,title,url,repository_name,author,state,created_at,updated_at,merged_at,closed_at,additions,deletions,changed_files,labels,milestone,assignees,comments_count,reviews_count,review_threads_count,time_to_merge_minutes,time_to_first_approval_minutes,first_approval_at,first_approver,ready_for_review_at
+
+```
+
+### 2. 個人プルリクエスト CSV (`pull_requests_[ユーザー名]_[開始日]_[終了日].csv`)
+
+特定ユーザーのプルリクエストデータ（24 列、全ユーザー CSV と同じ形式）
+
+### 3. レビューサマリー CSV (`review_summary_[ユーザー名]_[開始日]_[終了日].csv`)
+
+特定ユーザーのレビュー活動サマリー（6 列）：
+
+```csv
+user,period_start,period_end,reviewed_pr_count,submitted_review_action_count,total_review_comments_given
+"username","2025-06-01","2025-06-26",6,7,1
+```
+
+### 4. 統合分析 CSV (`combined_analysis_[ユーザー名]_[開始日]_[終了日].csv`)
+
+プルリクエストデータとレビューサマリーを統合した形式（21 列）：
+
+```csv
+pr_number,title,url,repository_name,author,state,created_at,merged_at,additions,deletions,changed_files,time_to_merge_minutes,time_to_first_approval_minutes,comments_count,reviews_count,labels,assignees,reviewer_user,reviewer_pr_count,reviewer_action_count,reviewer_comments_given
+```
+
+**CSV の特徴**:
+
+- すべてのテキストフィールドはダブルクォートで囲まれており、Google スプレッドシートでの列ズレを防止
+- 数値フィールドはクォートなしで出力され、Excel 等での数値認識が向上
+- 日本語を含む長いタイトルも適切にエスケープ処理済み
+
 ## プロジェクト構成
 
 ```
@@ -442,6 +527,18 @@ npm run dev generate-prompt
 ```
 
 3. 生成されたプロンプトファイルを ChatGPT にコピー&ペーストして分析依頼
+
+### CSV エクスポートでの使用例
+
+1. 全ユーザーのプルリクエストを CSV エクスポート
+
+```bash
+npm run dev export-csv
+```
+
+2. CSV ファイルを Google スプレッドシートにインポート
+
+3. Looker や他の分析ツールでチーム全体の開発生産性を可視化
 
 ### チーム評価での使用例
 

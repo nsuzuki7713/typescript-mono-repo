@@ -77,6 +77,24 @@ export class GitHubClient {
   }
 
   /**
+   * Build search query string for all pull requests (no author filter)
+   */
+  buildAllPRSearchQuery(
+    startDate: string,
+    endDate: string,
+    repositories?: string[]
+  ): string {
+    let query = `is:pr created:${startDate}..${endDate}`;
+
+    if (repositories && repositories.length > 0) {
+      const repoQuery = repositories.map((repo) => `repo:${repo}`).join(" ");
+      query = `${query} ${repoQuery}`;
+    }
+
+    return query;
+  }
+
+  /**
    * Build search query string for reviewed pull requests
    */
   buildReviewSearchQuery(

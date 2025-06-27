@@ -70,6 +70,63 @@ export class PullRequestService {
   }
 
   /**
+   * Fetch all pull requests within the specified date range (all users)
+   */
+  async fetchAllPullRequests(
+    startDate: string,
+    endDate: string,
+    repositories?: string[]
+  ): Promise<GitHubPullRequest[]> {
+    Logger.info(`Fetching all pull requests in repositories`);
+    Logger.info(`Date range: ${startDate} to ${endDate}`);
+
+    const query = this.client.buildAllPRSearchQuery(
+      startDate,
+      endDate,
+      repositories
+    );
+    Logger.info(`Search query: ${query}`);
+
+    const allPullRequests: GitHubPullRequest[] = [];
+    let hasNextPage = true;
+    let cursor: string | null = null;
+
+    while (hasNextPage) {
+      await this.rateLimiter.wait();
+
+      try {
+        const response: any = await this.client.searchPullRequests(
+          query,
+          100,
+          cursor || undefined
+        );
+
+        const pullRequests = response.search.edges
+          .map((edge: any) => edge.node)
+          .filter((pr: GraphQLPullRequest) =>
+            this.isValidPullRequest(pr, startDate, endDate)
+          )
+          .map((pr: GraphQLPullRequest) => this.transformPullRequest(pr));
+
+        allPullRequests.push(...pullRequests);
+
+        hasNextPage = response.search.pageInfo.hasNextPage;
+        cursor = response.search.pageInfo.endCursor;
+
+        Logger.info(
+          `Fetched ${pullRequests.length} PRs (Total: ${allPullRequests.length})`
+        );
+      } catch (error) {
+        Logger.error(`Failed to fetch pull requests: ${error}`);
+        throw error;
+      }
+    }
+
+    Logger.info(`Total pull requests fetched: ${allPullRequests.length}`);
+    return allPullRequests;
+  }
+
+  /**
    * Validate if pull request is within the date range and has required data
    */
   private isValidPullRequest(

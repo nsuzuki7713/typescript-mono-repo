@@ -8,6 +8,7 @@ import { Logger } from "./utils/logger";
 import { TeamAnalysisService } from "./services/teamAnalysisService";
 import { PromptGeneratorService } from "./services/promptGeneratorService";
 import { TeamConfig } from "./types/github";
+import { CSVExportService } from "./services/csvExportService";
 
 // Load environment variables
 dotenv.config();
@@ -266,6 +267,126 @@ async function main() {
         if (errorStack) {
           Logger.error(`Error stack: ${errorStack}`);
         }
+        process.exit(1);
+      }
+    });
+
+  // CSV エクスポートコマンド
+  program
+    .command("export-csv")
+    .description("Export pull request data to CSV format")
+    .option("-o, --output <dir>", "Output directory", "./output")
+    .option("-u, --user <user>", "Target user (default: from config)")
+    .option("-s, --start <date>", "Start date (YYYY-MM-DD, default: from config)")
+    .option("-e, --end <date>", "End date (YYYY-MM-DD, default: from config)")
+    .option("--pr-only", "Export pull requests only")
+    .option("--review-only", "Export review summary only")
+    .option("--combined", "Export combined data (default)")
+    .option("--all-users", "Export all users' pull requests (default: true)")
+    .option("--single-user", "Export specific user's pull requests only")
+    .action(async (options) => {
+      try {
+        const config = loadAndValidateConfig();
+        const csvExportService = new CSVExportService();
+        const controller = new AnalyzerController();
+
+        const outputDir = options.output || config.outputDir;
+        const user = options.user || config.userLogin;
+        const startDate = options.start || config.periodStartDate;
+        const endDate = options.end || config.periodEndDate;
+        const allUsers = !options.singleUser; // single-userオプションがない場合はデフォルトでtrue
+
+        Logger.info(`=== CSV Export Started ===`);
+        if (allUsers) {
+          Logger.info(`Mode: All users in repositories`);
+        } else {
+          Logger.info(`User: ${user}`);
+        }
+        Logger.info(`Period: ${startDate} - ${endDate}`);
+        Logger.info(`Output: ${outputDir}`);
+
+        let pullRequests: any[] = [];
+        let reviewSummary: any = null;
+        let csvFilePath: string;
+
+        if (allUsers) {
+          // 全ユーザーのプルリクエストを取得
+          if (!options.reviewOnly) {
+            try {
+              pullRequests = await controller.collectAllUsersPullRequestsAndReturn();
+            } catch (error) {
+              Logger.error(`Failed to fetch all users' pull requests: ${error}`);
+              throw error;
+            }
+          }
+
+          if (options.prOnly || (!options.reviewOnly && !options.combined)) {
+            csvFilePath = await csvExportService.exportAllUsersPullRequestsToCSV(pullRequests, {
+              outputDir,
+              filename: `all_users_pull_requests_${startDate}_${endDate}.csv`
+            });
+          } else {
+            Logger.warn("Review summary and combined exports are not supported for all-users mode. Using pull requests only.");
+            csvFilePath = await csvExportService.exportAllUsersPullRequestsToCSV(pullRequests, {
+              outputDir,
+              filename: `all_users_pull_requests_${startDate}_${endDate}.csv`
+            });
+          }
+        } else {
+          // 特定ユーザーのデータを取得（既存ロジック）
+          const prDetailsFile = `${outputDir}/created_prs_details_${user}_${startDate}_${endDate}.json`;
+          const reviewSummaryFile = `${outputDir}/my_review_summary_${user}_${startDate}_${endDate}.json`;
+
+          try {
+            const fs = await import('fs/promises');
+            
+            if (!options.reviewOnly) {
+              try {
+                const prData = await fs.readFile(prDetailsFile, 'utf-8');
+                pullRequests = JSON.parse(prData);
+                Logger.info(`Loaded ${pullRequests.length} pull requests from ${prDetailsFile}`);
+              } catch (error) {
+                Logger.warn(`Could not load PR data from ${prDetailsFile}, fetching from GitHub...`);
+                pullRequests = await controller.collectPullRequestsAndReturn();
+              }
+            }
+
+            if (!options.prOnly) {
+              try {
+                const reviewData = await fs.readFile(reviewSummaryFile, 'utf-8');
+                reviewSummary = JSON.parse(reviewData);
+                Logger.info(`Loaded review summary from ${reviewSummaryFile}`);
+              } catch (error) {
+                Logger.warn(`Could not load review summary from ${reviewSummaryFile}, fetching from GitHub...`);
+                reviewSummary = await controller.generateReviewSummaryAndReturn();
+              }
+            }
+          } catch (error) {
+            Logger.error(`Failed to load data: ${error}`);
+          }
+
+          if (options.prOnly) {
+            csvFilePath = await csvExportService.exportPullRequestsToCSV(pullRequests, {
+              outputDir,
+              filename: `pull_requests_${user}_${startDate}_${endDate}.csv`
+            });
+          } else if (options.reviewOnly) {
+            csvFilePath = await csvExportService.exportReviewSummaryToCSV([reviewSummary], {
+              outputDir,
+              filename: `review_summary_${user}_${startDate}_${endDate}.csv`
+            });
+          } else {
+            csvFilePath = await csvExportService.exportCombinedToCSV(pullRequests, {
+              outputDir,
+              filename: `combined_analysis_${user}_${startDate}_${endDate}.csv`
+            }, reviewSummary);
+          }
+        }
+
+        Logger.info("=== CSV Export Completed ===");
+        Logger.info(`CSV file: ${csvFilePath}`);
+      } catch (error) {
+        Logger.error(`CSV export failed: ${error}`);
         process.exit(1);
       }
     });

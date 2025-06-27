@@ -41,6 +41,20 @@ export class FileManager {
   }
 
   /**
+   * Write text data to file
+   */
+  static async writeTextFile(
+    outputDir: string,
+    filename: string,
+    data: string
+  ): Promise<string> {
+    await this.ensureDirectoryExists(outputDir);
+    const filePath = path.join(outputDir, filename);
+    await fs.writeFile(filePath, data, "utf-8");
+    return filePath;
+  }
+
+  /**
    * Generate filename with timestamp pattern
    */
   static generateFilename(
