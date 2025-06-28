@@ -51,10 +51,10 @@ export class CSVExportService {
       this.formatCsvValue(pr.repository.nameWithOwner),
       this.formatCsvValue(pr.author.login),
       this.formatCsvValue(pr.state),
-      this.formatCsvValue(pr.created_at),
-      this.formatCsvValue(pr.updated_at),
-      this.formatCsvValue(pr.merged_at || ''),
-      this.formatCsvValue(pr.closed_at || ''),
+      this.formatDateForLooker(pr.created_at),
+      this.formatDateForLooker(pr.updated_at),
+      this.formatDateForLooker(pr.merged_at || ''),
+      this.formatDateForLooker(pr.closed_at || ''),
       this.formatCsvValue(pr.additions),
       this.formatCsvValue(pr.deletions),
       this.formatCsvValue(pr.changed_files),
@@ -66,9 +66,9 @@ export class CSVExportService {
       this.formatCsvValue(pr.review_threads_total_count),
       this.formatCsvValue(pr.time_to_merge_minutes || ''),
       this.formatCsvValue(pr.time_to_first_approval_minutes || ''),
-      this.formatCsvValue(pr.first_approval_at || ''),
+      this.formatDateForLooker(pr.first_approval_at || ''),
       this.formatCsvValue(pr.first_approver || ''),
-      this.formatCsvValue(pr.ready_for_review_at)
+      this.formatDateForLooker(pr.ready_for_review_at)
     ]);
 
     let csvContent = '';
@@ -169,10 +169,10 @@ export class CSVExportService {
       this.formatCsvValue(pr.repository.nameWithOwner),
       this.formatCsvValue(pr.author.login),
       this.formatCsvValue(pr.state),
-      this.formatCsvValue(pr.created_at),
-      this.formatCsvValue(pr.updated_at),
-      this.formatCsvValue(pr.merged_at || ''),
-      this.formatCsvValue(pr.closed_at || ''),
+      this.formatDateForLooker(pr.created_at),
+      this.formatDateForLooker(pr.updated_at),
+      this.formatDateForLooker(pr.merged_at || ''),
+      this.formatDateForLooker(pr.closed_at || ''),
       this.formatCsvValue(pr.additions),
       this.formatCsvValue(pr.deletions),
       this.formatCsvValue(pr.changed_files),
@@ -184,9 +184,9 @@ export class CSVExportService {
       this.formatCsvValue(pr.review_threads_total_count),
       this.formatCsvValue(pr.time_to_merge_minutes || ''),
       this.formatCsvValue(pr.time_to_first_approval_minutes || ''),
-      this.formatCsvValue(pr.first_approval_at || ''),
+      this.formatDateForLooker(pr.first_approval_at || ''),
       this.formatCsvValue(pr.first_approver || ''),
-      this.formatCsvValue(pr.ready_for_review_at)
+      this.formatDateForLooker(pr.ready_for_review_at)
     ]);
 
     let csvContent = '';
@@ -250,8 +250,8 @@ export class CSVExportService {
         this.formatCsvValue(pr.repository.nameWithOwner),
         this.formatCsvValue(pr.author.login),
         this.formatCsvValue(pr.state),
-        this.formatCsvValue(pr.created_at),
-        this.formatCsvValue(pr.merged_at || ''),
+        this.formatDateForLooker(pr.created_at),
+        this.formatDateForLooker(pr.merged_at || ''),
         this.formatCsvValue(pr.additions),
         this.formatCsvValue(pr.deletions),
         this.formatCsvValue(pr.changed_files),
@@ -314,6 +314,35 @@ export class CSVExportService {
       return String(value);
     }
     return this.escapeCsvValue(String(value));
+  }
+
+  /**
+   * 日付フィールド用のフォーマット（Looker用 YYYY-MM-DD HH:MM:SS形式）
+   */
+  private formatDateForLooker(dateValue: any): string {
+    if (!dateValue || dateValue === '') {
+      return '';
+    }
+    
+    try {
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) {
+        return this.formatCsvValue(dateValue); // 無効な日付の場合は通常のフォーマットで
+      }
+      
+      // YYYY-MM-DD HH:MM:SS形式で出力
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      
+      const formatted = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      return this.escapeCsvValue(formatted);
+    } catch (error) {
+      return this.formatCsvValue(dateValue); // エラーの場合は通常のフォーマットで
+    }
   }
 
   /**
