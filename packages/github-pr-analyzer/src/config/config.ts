@@ -84,6 +84,10 @@ export class ConfigManager {
   public updateConfig(updates: Partial<AppConfig>): void {
     this.config = { ...this.config, ...updates };
   }
+
+  public setConfig(config: AppConfig): void {
+    this.config = config;
+  }
 }
 
 /**

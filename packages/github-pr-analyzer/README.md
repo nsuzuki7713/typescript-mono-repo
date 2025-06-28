@@ -26,6 +26,13 @@
 12. **個人 CSV エクスポート**: 特定ユーザーのプルリクエストとレビューデータを CSV 出力
 13. **複数出力形式**: プルリクのみ、レビューのみ、統合データの 3 種類の出力形式をサポート
 
+### GitHub Actions 自動化機能
+
+14. **PR マージ時自動更新**: GitHub Actions でプルリクエストマージ時に自動でスプレッドシートを更新
+15. **Google Sheets 統合**: Google Sheets API を使用して既存スプレッドシートの最終行にデータを自動追加
+16. **重複除去機能**: 既存データと比較して新しいプルリクエストのみを追加し、重複を防止
+17. **CI/CD パイプライン**: フルマネージドな GitHub Actions ワークフローによる自動実行
+
 ## セットアップ
 
 ### 1. 依存関係のインストール
@@ -183,6 +190,39 @@ npm run dev export-csv --combined --single-user -u ユーザー名
 ```bash
 npm run dev export-csv -s 2025-01-01 -e 2025-12-31 -o ./custom-output
 ```
+
+### GitHub Actions 自動スプレッドシート更新
+
+#### セットアップ
+
+詳細なセットアップ手順は `GITHUB_ACTIONS_SETUP.md` を参照してください。
+
+#### 手動でスプレッドシート更新
+
+**特定の PR を追加（推奨）**:
+
+```bash
+npm run dev update-spreadsheet --pr-number 192 --repository "nsuzuki7713/typescript-mono-repo"
+```
+
+**期間を指定して全 PR を追加**:
+
+```bash
+npm run dev update-spreadsheet --start 2025-01-01 --end 2025-12-31
+```
+
+#### 環境変数での設定
+
+**必須環境変数**:
+
+- `GOOGLE_SHEETS_CREDENTIALS`: Google Sheets API の認証情報（JSON）
+- `GOOGLE_SHEET_ID`: 更新対象のスプレッドシート ID
+
+**GitHub Actions では不要になった環境変数**（フェーズ 2.1 最適化により）:
+
+- ~~`REPOSITORIES`~~ → マージイベントから自動取得
+- ~~`PERIOD_START_DATE`~~ → 特定 PR のみ処理
+- ~~`PERIOD_END_DATE`~~ → 特定 PR のみ処理
 
 ### チーム分析
 

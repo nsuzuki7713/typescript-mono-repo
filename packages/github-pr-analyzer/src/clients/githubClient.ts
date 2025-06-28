@@ -2,6 +2,7 @@ import { graphql } from "@octokit/graphql";
 import { GraphQLSearchResponse, GraphQLReviewResponse } from "../types/github";
 import { SEARCH_PULL_REQUESTS_QUERY } from "../graphql/pullRequests";
 import { GET_USER_REVIEWS_QUERY } from "../graphql/reviews";
+import { GET_SINGLE_PULL_REQUEST_QUERY } from "../graphql/singlePullRequest";
 
 export class GitHubClient {
   private graphqlWithAuth: typeof graphql;
@@ -194,6 +195,62 @@ export class GitHubClient {
         firstPrDate: null,
         lastPrDate: null,
       };
+    }
+  }
+
+  /**
+   * 特定のプルリクエストを取得
+   */
+  async getSinglePullRequest(
+    repositoryOwner: string,
+    repositoryName: string,
+    prNumber: number
+  ): Promise<any> {
+    try {
+      const response = await this.graphqlWithAuth(GET_SINGLE_PULL_REQUEST_QUERY, {
+        owner: repositoryOwner,
+        name: repositoryName,
+        number: prNumber,
+      }) as any;
+
+      const pr = response.repository?.pullRequest;
+      if (!pr) {
+        throw new Error(`Pull request #${prNumber} not found in repository ${repositoryOwner}/${repositoryName}`);
+      }
+
+      // レスポンスを既存の形式に合わせて変換
+      const transformedPr = {
+        ...pr,
+        pr_number: pr.number,
+        created_at: pr.createdAt,
+        updated_at: pr.updatedAt,
+        merged_at: pr.mergedAt,
+        closed_at: pr.closedAt,
+        changed_files: pr.changedFiles,
+        comments_on_pr_total_count: pr.comments.totalCount,
+        reviews_submitted_total_count: pr.reviews.totalCount,
+        review_threads_total_count: pr.reviewThreads.totalCount,
+        time_to_merge_minutes: pr.mergedAt ? this.calculateTimeToMerge(pr.createdAt, pr.mergedAt) : null,
+        ready_for_review_at: pr.timelineItems.nodes.length > 0 ? pr.timelineItems.nodes[0].createdAt : pr.createdAt,
+      };
+
+      // 最初の承認情報を計算
+      const approvals = pr.reviews.nodes.filter((review: any) => review.state === 'APPROVED');
+      if (approvals.length > 0) {
+        const firstApproval = approvals.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())[0];
+        transformedPr.first_approval_at = firstApproval.createdAt;
+        transformedPr.first_approver = firstApproval.author?.login;
+        transformedPr.time_to_first_approval_minutes = this.calculateTimeToMerge(transformedPr.ready_for_review_at, firstApproval.createdAt);
+      } else {
+        transformedPr.first_approval_at = null;
+        transformedPr.first_approver = null;
+        transformedPr.time_to_first_approval_minutes = null;
+      }
+
+      return transformedPr;
+    } catch (error) {
+      console.error(`Error fetching pull request #${prNumber}:`, error);
+      throw new Error(`Failed to fetch pull request #${prNumber}: ${error}`);
     }
   }
 }

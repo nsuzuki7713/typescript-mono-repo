@@ -9,6 +9,7 @@ import { TeamAnalysisService } from "./services/teamAnalysisService";
 import { PromptGeneratorService } from "./services/promptGeneratorService";
 import { TeamConfig } from "./types/github";
 import { CSVExportService } from "./services/csvExportService";
+import { GoogleSheetsService } from "./services/googleSheetsService";
 
 // Load environment variables
 dotenv.config();
@@ -387,6 +388,131 @@ async function main() {
         Logger.info(`CSV file: ${csvFilePath}`);
       } catch (error) {
         Logger.error(`CSV export failed: ${error}`);
+        process.exit(1);
+      }
+    });
+
+  // Google Spreadsheet更新コマンド
+  program
+    .command("update-spreadsheet")
+    .description("Update Google Spreadsheet with latest PR data")
+    .option("-o, --output <dir>", "Output directory", "./output")
+    .option("-s, --start <date>", "Start date (YYYY-MM-DD, default: from env)")
+    .option("-e, --end <date>", "End date (YYYY-MM-DD, default: from env)")
+    .option("--pr-number <number>", "Specific PR number to add")
+    .option("--repository <repo>", "Repository in format owner/name")
+    .action(async (options) => {
+      try {
+        Logger.info("=== Google Spreadsheet Update Started ===");
+
+        // 環境変数から設定を取得
+        const githubToken = process.env.GITHUB_TOKEN;
+        const googleCredentials = process.env.GOOGLE_SHEETS_CREDENTIALS;
+        const sheetId = process.env.GOOGLE_SHEET_ID;
+        const repositories = process.env.REPOSITORIES;
+        const defaultStartDate = process.env.PERIOD_START_DATE;
+        const defaultEndDate = process.env.PERIOD_END_DATE;
+
+        if (!githubToken) {
+          throw new Error("GITHUB_TOKEN environment variable is required");
+        }
+        if (!googleCredentials) {
+          throw new Error("GOOGLE_SHEETS_CREDENTIALS environment variable is required");
+        }
+        if (!sheetId) {
+          throw new Error("GOOGLE_SHEET_ID environment variable is required");
+        }
+
+        // PR番号とリポジトリが指定された場合の処理
+        if (options.prNumber && options.repository) {
+          const prNumber = parseInt(options.prNumber);
+          const [owner, name] = options.repository.split('/');
+          
+          if (!owner || !name) {
+            throw new Error("Repository must be in format 'owner/name'");
+          }
+
+          Logger.info(`Processing specific PR: #${prNumber} from ${options.repository}`);
+
+          // 最小限の設定を作成
+          const tempConfig = {
+            githubToken,
+            userLogin: "temp",
+            periodStartDate: "2020-01-01", // 単一PR取得時は使用されない
+            periodEndDate: "2030-12-31",   // 単一PR取得時は使用されない
+            repositories: [],
+            outputDir: options.output || "./output"
+          };
+
+          // ConfigManagerにtemporary設定を注入
+          const configManager = ConfigManager.getInstance();
+          configManager.setConfig(tempConfig);
+
+          // 特定のPRデータを取得
+          const controller = new AnalyzerController();
+          const pullRequest = await controller.collectSinglePullRequest(owner, name, prNumber);
+
+          Logger.info(`Fetched PR #${prNumber}: ${pullRequest.title}`);
+
+          // Google Sheets サービスを初期化
+          const credentials = JSON.parse(googleCredentials);
+          const googleSheetsService = new GoogleSheetsService({
+            credentials,
+            spreadsheetId: sheetId
+          });
+
+          // 単一PRデータをスプレッドシートに追加
+          await googleSheetsService.appendPullRequestData([pullRequest], 'Sheet1');
+
+          Logger.info("=== Google Spreadsheet Update Completed ===");
+          Logger.info(`PR #${prNumber} has been added to the spreadsheet`);
+        } else {
+          // 期間での全PR取得処理（従来の処理）
+          const startDate = options.start || defaultStartDate;
+          const endDate = options.end || defaultEndDate;
+
+          if (!startDate || !endDate) {
+            throw new Error("Period start and end dates are required when not specifying a specific PR");
+          }
+
+          // GitHub Actions環境用の設定を作成
+          const tempConfig = {
+            githubToken,
+            userLogin: "temp", // 全ユーザー取得時は使用されない
+            periodStartDate: startDate,
+            periodEndDate: endDate,
+            repositories: repositories ? repositories.split(',') : [],
+            outputDir: options.output || "./output"
+          };
+
+          // ConfigManagerにtemporary設定を注入
+          const configManager = ConfigManager.getInstance();
+          configManager.setConfig(tempConfig);
+
+          Logger.info(`Period: ${startDate} - ${endDate}`);
+          Logger.info(`Repositories: ${repositories || 'all'}`);
+
+          // 全ユーザーのプルリクエストデータを取得
+          const controller = new AnalyzerController();
+          const pullRequests = await controller.collectAllUsersPullRequestsAndReturn();
+
+          Logger.info(`Fetched ${pullRequests.length} pull requests`);
+
+          // Google Sheets サービスを初期化
+          const credentials = JSON.parse(googleCredentials);
+          const googleSheetsService = new GoogleSheetsService({
+            credentials,
+            spreadsheetId: sheetId
+          });
+
+          // 新しいPRデータのみをスプレッドシートに追加
+          await googleSheetsService.appendNewPullRequestData(pullRequests, 'Sheet1');
+
+          Logger.info("=== Google Spreadsheet Update Completed ===");
+          Logger.info("New PR data has been added to the spreadsheet");
+        }
+      } catch (error) {
+        Logger.error(`Spreadsheet update failed: ${error}`);
         process.exit(1);
       }
     });

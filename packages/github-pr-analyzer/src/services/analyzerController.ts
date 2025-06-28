@@ -192,6 +192,26 @@ export class AnalyzerController {
   }
 
   /**
+   * Collect specific pull request by number and repository
+   */
+  async collectSinglePullRequest(
+    repositoryOwner: string,
+    repositoryName: string,
+    prNumber: number
+  ): Promise<GitHubPullRequest> {
+    Logger.info(`Collecting pull request #${prNumber} from ${repositoryOwner}/${repositoryName}...`);
+
+    const pullRequest = await this.githubClient.getSinglePullRequest(
+      repositoryOwner,
+      repositoryName,
+      prNumber
+    );
+
+    Logger.info(`Collected pull request #${prNumber}: ${pullRequest.title}`);
+    return pullRequest;
+  }
+
+  /**
    * Generate overall summary and save to JSON file
    */
   async generateOverallSummary(pullRequestsFilePath: string): Promise<string> {
