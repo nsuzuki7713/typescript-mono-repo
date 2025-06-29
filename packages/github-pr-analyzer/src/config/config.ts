@@ -15,10 +15,10 @@ export interface AppConfig {
 
 export class ConfigManager {
   private static instance: ConfigManager;
-  private config: AppConfig;
+  private config: AppConfig | null = null;
 
   private constructor() {
-    this.config = this.loadConfig();
+    // 初期化時はバリデーションを実行しない
   }
 
   public static getInstance(): ConfigManager {
@@ -78,10 +78,16 @@ export class ConfigManager {
   }
 
   public getConfig(): AppConfig {
+    if (!this.config) {
+      this.config = this.loadConfig();
+    }
     return { ...this.config };
   }
 
   public updateConfig(updates: Partial<AppConfig>): void {
+    if (!this.config) {
+      this.config = this.loadConfig();
+    }
     this.config = { ...this.config, ...updates };
   }
 
