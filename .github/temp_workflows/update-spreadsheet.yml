@@ -1,0 +1,44 @@
+# name: Update Google Spreadsheet on PR Merge
+
+# on:
+#   pull_request:
+#     types: [closed]
+#     branches: [main, master]
+
+# jobs:
+#   update-spreadsheet:
+#     if: github.event.pull_request.merged == true
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+
+#       - name: Setup pnpm
+#         uses: pnpm/action-setup@v4
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: "18"
+#           cache: "pnpm"
+
+#       - name: Install dependencies
+#         run: pnpm install --frozen-lockfile
+
+#       - name: List workspaces (debug)
+#         run: pnpm list -r --depth -1
+
+#       - name: Build project
+#         run: pnpm --filter github-pr-analyzer build
+
+#       - name: Update Google Spreadsheet with merged PR data
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
+#           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+#           MERGED_PR_NUMBER: ${{ github.event.pull_request.number }}
+#           MERGED_PR_REPOSITORY: ${{ github.repository }}
+#         run: |
+#           cd packages/github-pr-analyzer
+#           node dist/main.js update-spreadsheet --pr-number $MERGED_PR_NUMBER --repository $MERGED_PR_REPOSITORY
