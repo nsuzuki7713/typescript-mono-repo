@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: List workspaces (debug)
+        run: pnpm list -r --depth -1
+
       - name: Build project
         run: pnpm --filter github-pr-analyzer build
 
