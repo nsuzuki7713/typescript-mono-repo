@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+package-lock.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -18,7 +19,12 @@ build/
 
 # Output files
 output/
-*.json
+# Ignore output JSON files but keep package.json and config files
+output/*.json
+team_*.json
+*_details_*.json
+*_summary_*.json
+*_analysis_*.json
 
 # IDE and editor files
 .vscode/
