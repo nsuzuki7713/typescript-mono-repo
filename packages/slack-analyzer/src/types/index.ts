@@ -28,6 +28,7 @@ export interface FormattedMessage {
   username: string;
   text: string;
   isReply: boolean;
+  url?: string;
 }
 
 export interface ExtractorStats {

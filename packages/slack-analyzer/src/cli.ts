@@ -28,10 +28,20 @@ program
   .option('--end-date <date>', 'End date (YYYY-MM-DD format, e.g., 2025-06-17)')
   .action(async (options: any) => {
     try {
+      const envExcludedUserIds = process.env.EXCLUDED_USER_IDS 
+        ? process.env.EXCLUDED_USER_IDS.split(',').map((id: string) => id.trim())
+        : [];
+      
+      const cliExcludedUserIds = options.exclude 
+        ? options.exclude.split(',').map((id: string) => id.trim())
+        : [];
+      
+      const excludedUserIds = [...envExcludedUserIds, ...cliExcludedUserIds];
+
       const config: ExtractorConfig = {
         token: options.token || process.env.SLACK_BOT_TOKEN || '',
         channelId: options.channel,
-        excludedUserIds: options.exclude ? options.exclude.split(',').map((id: string) => id.trim()) : [],
+        excludedUserIds,
         messageLimit: parseInt(options.limit, 10),
         outputFileName: options.output,
         outputFormat: options.format || 'text',
@@ -54,7 +64,9 @@ program
       console.log(`   Message limit: ${config.messageLimit}`);
       console.log(`   Output file: ${config.outputFileName}`);
       console.log(`   Date range: ${config.startDate || 'All time'} to ${config.endDate || 'Now'}`);
-      console.log(`   Excluded users: ${config.excludedUserIds.length > 0 ? config.excludedUserIds.join(', ') : 'None'}`);
+      console.log(`   Excluded users from ENV: ${envExcludedUserIds.length > 0 ? envExcludedUserIds.join(', ') : 'None'}`);
+      console.log(`   Excluded users from CLI: ${cliExcludedUserIds.length > 0 ? cliExcludedUserIds.join(', ') : 'None'}`);
+      console.log(`   Total excluded users: ${config.excludedUserIds.length > 0 ? config.excludedUserIds.join(', ') : 'None'}`);
       console.log('');
 
       const extractor = new SlackMessageExtractor(config);

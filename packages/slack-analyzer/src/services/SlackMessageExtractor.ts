@@ -226,12 +226,14 @@ export class SlackMessageExtractor {
       const user = this.users.get(message.user);
       const username = user?.real_name || user?.name || message.user;
       const formattedText = await this.formatMentions(message.text);
+      const messageUrl = this.generateSlackUrl(message.ts, message.thread_ts);
       
       formatted.push({
         timestamp: this.formatTimestamp(message.ts),
         username,
         text: formattedText,
-        isReply: false
+        isReply: false,
+        url: messageUrl
       });
 
       if (message.replies) {
@@ -321,6 +323,20 @@ export class SlackMessageExtractor {
       date.setUTCHours(23, 59, 59, 999);
     }
     return Math.floor(date.getTime() / 1000).toString();
+  }
+
+  private generateSlackUrl(ts: string, threadTs?: string): string {
+    // SlackのURLフォーマット: https://workspace.slack.com/archives/CHANNEL_ID/pTIMESTAMP
+    // タイムスタンプは "." を削除して "p" プレフィックスを付ける
+    const timestampForUrl = 'p' + ts.replace('.', '');
+    const baseUrl = `https://micoworks.slack.com/archives/${this.config.channelId}/${timestampForUrl}`;
+    
+    // スレッドの場合は、スレッドのタイムスタンプも追加
+    if (threadTs && threadTs !== ts) {
+      return `${baseUrl}?thread_ts=${threadTs}&cid=${this.config.channelId}`;
+    }
+    
+    return baseUrl;
   }
 
   private handleError(error: any): void {
