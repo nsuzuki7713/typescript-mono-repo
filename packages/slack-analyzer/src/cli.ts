@@ -20,7 +20,7 @@ program
   .description('Extract messages from a Slack channel')
   .requiredOption('-c, --channel <channelId>', 'Slack channel ID (e.g., C1234567890)')
   .option('-t, --token <token>', 'Slack bot token (or use SLACK_BOT_TOKEN env var)')
-  .option('-o, --output <fileName>', 'Output file name', 'slack-messages.txt')
+  .option('-o, --output <fileName>', 'Output file name', 'slack-messages')
   .option('-f, --format <format>', 'Output format (text|json|markdown)', 'text')
   .option('-l, --limit <number>', 'Maximum number of messages to extract', '100')
   .option('-e, --exclude <userIds>', 'Comma-separated list of user IDs to exclude', '')
@@ -72,7 +72,7 @@ program
       const extractor = new SlackMessageExtractor(config);
       const { messages, stats } = await extractor.extractMessages();
       
-      await FileExporter.exportToFile(messages, config.outputFileName, stats, config.outputFormat || 'text');
+      await FileExporter.exportToFile(messages, config.outputFileName, stats, config.outputFormat || 'text', config.startDate, config.endDate);
       
       console.log('\n🎉 Extraction completed successfully!');
       

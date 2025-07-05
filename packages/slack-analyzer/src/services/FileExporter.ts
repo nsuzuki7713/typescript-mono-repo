@@ -7,25 +7,46 @@ export class FileExporter {
     messages: FormattedMessage[], 
     fileName: string, 
     stats: ExtractorStats,
-    format: 'text' | 'json' | 'markdown' = 'text'
+    format: 'text' | 'json' | 'markdown' = 'text',
+    startDate?: string,
+    endDate?: string
   ): Promise<void> {
-    const outputDir = path.dirname(fileName);
+    // 日付を含むファイル名を生成
+    const baseFileName = path.basename(fileName, path.extname(fileName));
+    const extension = path.extname(fileName) || '.txt';
+    
+    // 期間が指定されている場合は期間をファイル名に含める
+    let dateFileName: string;
+    if (startDate && endDate) {
+      dateFileName = `${baseFileName}-${startDate}_${endDate}${extension}`;
+    } else if (startDate) {
+      dateFileName = `${baseFileName}-from_${startDate}${extension}`;
+    } else if (endDate) {
+      dateFileName = `${baseFileName}-until_${endDate}${extension}`;
+    } else {
+      const dateStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD形式
+      dateFileName = `${baseFileName}-${dateStr}${extension}`;
+    }
+    
+    // output/ディレクトリに出力
+    const outputDir = 'output';
+    const fullFilePath = path.join(outputDir, dateFileName);
     
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
     let content: string;
-    let actualFileName = fileName;
+    let actualFileName = fullFilePath;
 
     switch (format) {
       case 'json':
         content = this.formatAsJSON(messages, stats);
-        actualFileName = fileName.replace(/\.[^.]*$/, '.json');
+        actualFileName = fullFilePath.replace(/\.[^.]*$/, '.json');
         break;
       case 'markdown':
         content = this.formatAsMarkdown(messages, stats);
-        actualFileName = fileName.replace(/\.[^.]*$/, '.md');
+        actualFileName = fullFilePath.replace(/\.[^.]*$/, '.md');
         break;
       default:
         content = this.formatAsText(messages, stats);
